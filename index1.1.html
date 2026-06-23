@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alko Market — Sklad Boshqaruvi</title>
+<style>
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-info: #e8f0fe;
+  --bg-success: #e6f4ea;
+  --bg-warning: #fef7e0;
+  --bg-danger: #fce8e6;
+  --text-primary: #1a1a1a;
+  --text-secondary: #5f6368;
+  --text-tertiary: #9aa0a6;
+  --text-info: #1967d2;
+  --text-success: #137333;
+  --text-warning: #b06000;
+  --text-danger: #c5221f;
+  --border-secondary: #dadce0;
+  --border-tertiary: #e8eaed;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: var(--bg-secondary); color: var(--text-primary); padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+.tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; padding: 0.5rem 0; border-bottom: 0.5px solid var(--border-tertiary); flex-wrap: wrap; }
+.tab { padding: 8px 14px; border-radius: var(--radius-md); border: 0.5px solid var(--border-secondary); background: transparent; cursor: pointer; font-size: 13px; color: var(--text-secondary); }
+.tab.active { background: var(--bg-secondary); color: var(--text-primary); font-weight: 500; }
+.section { display: none; }
+.section.active { display: block; }
+.card { background: var(--bg-primary); border: 0.5px solid var(--border-tertiary); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+label { font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+input, select { width: 100%; margin-bottom: 12px; padding: 8px 10px; border: 0.5px solid var(--border-secondary); border-radius: var(--radius-md); font-size: 14px; font-family: inherit; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+button.primary { background: var(--bg-info); color: var(--text-info); border: none; padding: 10px 20px; border-radius: var(--radius-md); cursor: pointer; font-size: 14px; font-weight: 500; width: 100%; }
+button.primary:hover { opacity: 0.85; }
+button.danger-confirm { background: var(--bg-danger); color: var(--text-danger); border: none; padding: 8px 14px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; font-weight: 500; }
+button.cancel-confirm { background: transparent; border: 0.5px solid var(--border-secondary); color: var(--text-secondary); padding: 8px 14px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1rem; }
+.metric { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; border-left: 3px solid var(--border-secondary); }
+.metric.m-green { border-left-color: #34a853; }
+.metric.m-amber { border-left-color: #f9ab00; }
+.metric.m-blue { border-left-color: #4285f4; }
+.metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.metric-val { font-size: 20px; font-weight: 600; color: var(--text-primary); }
+.metric-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border-secondary); color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
+td { padding: 8px 10px; border-bottom: 0.5px solid var(--border-tertiary); color: var(--text-primary); white-space: nowrap; }
+.badge { display: inline-block; padding: 2px 9px; border-radius: 100px; font-size: 12px; font-weight: 500; }
+.badge-green { background: #d4edda; color: #1e7e34; }
+.badge-blue { background: #cfe2ff; color: #084298; }
+.badge-amber { background: #fff3cd; color: #856404; }
+.badge-gray { background: #e9ecef; color: #495057; }
+.empty { text-align: center; color: var(--text-tertiary); padding: 2rem; font-size: 14px; }
+.aroq-row { display: flex; align-items: flex-end; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+.aroq-row input, .aroq-row select { margin-bottom: 0; }
+.remove-btn { background: var(--bg-danger); color: var(--text-danger); border: none; border-radius: var(--radius-md); padding: 8px 12px; cursor: pointer; font-size: 13px; font-weight: 600; flex-shrink: 0; margin-bottom: 0; }
+.icon-btn { background: var(--bg-secondary); border: 1px solid var(--border-secondary); border-radius: var(--radius-md); padding: 6px 10px; cursor: pointer; font-size: 13px; color: var(--text-primary); margin: 0 2px; font-weight: 600; }
+.icon-btn:hover { background: var(--border-tertiary); }
+.icon-btn.danger { color: var(--text-danger); border-color: #f5b5b1; }
+.add-btn { background: transparent; border: 1px dashed var(--border-secondary); color: var(--text-secondary); padding: 10px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; width: 100%; margin-bottom: 12px; font-weight: 500; }
+.section-title { font-size: 16px; font-weight: 600; margin-bottom: 1rem; color: var(--text-primary); }
+.filter-row { display: flex; gap: 8px; margin-bottom: 0.25rem; flex-wrap: wrap; align-items: flex-end; }
+.filter-row select, .filter-row input { margin-bottom: 0; flex: 1; min-width: 110px; }
+.tolov-toggle { display: flex; gap: 8px; margin-bottom: 4px; }
+.tolov-btn { flex: 1; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border-secondary); cursor: pointer; font-size: 13px; font-weight: 600; background: transparent; color: var(--text-secondary); }
+.tolov-btn.selected-naqd { background: #34a853; color: #fff; border-color: transparent; }
+.tolov-btn.selected-qarz { background: #f9ab00; color: #fff; border-color: transparent; }
+.tolov-btn.selected-vitrina { background: #4285f4; color: #fff; border-color: transparent; }
+.field-required { font-size: 12px; color: var(--text-danger); margin-top: -8px; margin-bottom: 12px; min-height: 16px; font-weight: 500; }
+.qarz-warning { background: var(--bg-warning); color: var(--text-warning); border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; margin-bottom: 12px; display: none; }
+.vitrina-info { background: var(--bg-info); color: var(--text-info); border-radius: var(--radius-md); padding: 8px 12px; font-size: 13px; margin-bottom: 12px; display: none; }
+.pay-btn { background: #34a853; color: #fff; border: none; border-radius: var(--radius-md); padding: 6px 14px; cursor: pointer; font-size: 12px; font-weight: 600; }
+.calc-box { background: var(--bg-info); color: var(--text-info); border-radius: var(--radius-md); padding: 10px 14px; font-size: 14px; margin-bottom: 12px; font-weight: 600; }
+.toast { position: fixed; top: 16px; right: 16px; background: #1e7e34; color: #fff; padding: 12px 20px; border-radius: var(--radius-md); font-size: 14px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; display: none; max-width: 90vw; }
+.basket-item { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 10px; margin-bottom: 8px; }
+.basket-item-row { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; }
+.basket-item input, .basket-item select { margin-bottom: 0; }
+.basket-calc { font-size: 12px; color: var(--text-secondary); width: 100%; margin-top: 6px; }
+.basket-calc.error { color: var(--text-danger); font-weight: 600; }
+.basket-calc.warn-tashqi { color: var(--text-info); }
+.combo-wrap { position: relative; flex: 2; min-width: 180px; }
+.combo-input { width: 100%; }
+.combo-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg-primary); border: 1px solid var(--border-secondary); border-radius: var(--radius-md); max-height: 280px; overflow-y: auto; z-index: 50; display: none; box-shadow: 0 4px 14px rgba(0,0,0,0.15); }
+.combo-dropdown.open { display: block; }
+.combo-option { padding: 9px 12px; font-size: 13px; cursor: pointer; color: var(--text-primary); display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.combo-option:hover { background: var(--bg-secondary); }
+.combo-option .sub { color: var(--text-tertiary); font-size: 12px; flex-shrink: 0; }
+.combo-option.out-of-stock .sub { color: var(--text-warning); }
+.combo-empty { padding: 8px 12px; font-size: 13px; color: var(--text-tertiary); }
+.kirim-mode-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+.mode-btn { flex: 1; padding: 8px; border-radius: var(--radius-md); border: 1px solid var(--border-secondary); cursor: pointer; font-size: 13px; background: transparent; color: var(--text-secondary); font-weight: 500; }
+.mode-btn.active { background: #4285f4; color: #fff; border-color: transparent; }
+.grouped-sale { background: var(--bg-primary); border: 1px solid var(--border-tertiary); border-left: 4px solid var(--border-secondary); border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 1rem; cursor: pointer; transition: box-shadow 0.15s; }
+.grouped-sale:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.grouped-sale.gs-naqd { border-left-color: #34a853; }
+.grouped-sale.gs-qarz-open { border-left-color: #f9ab00; }
+.grouped-sale.gs-qarz-paid { border-left-color: #4285f4; }
+.grouped-sale.gs-vitrina { border-left-color: #8e44ec; }
+.grouped-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.grouped-head .name { font-weight: 600; font-size: 15px; }
+.grouped-head .meta { font-size: 12px; color: var(--text-secondary); }
+.grouped-line { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 6px 0; border-top: 0.5px solid var(--border-tertiary); gap: 8px; }
+.grouped-line:first-of-type { border-top: none; }
+.gl-name { flex: 1; }
+.gl-qty { display: flex; gap: 6px; flex-shrink: 0; }
+.qty-pill { background: var(--bg-secondary); border-radius: 100px; padding: 2px 9px; font-size: 11px; color: var(--text-secondary); font-weight: 600; white-space: nowrap; }
+.qty-pill.blok { background: #e3f2fd; color: #0d47a1; }
+.qty-pill.dona { background: #f3e5f5; color: #4a148c; }
+.gl-sum { font-weight: 600; min-width: 90px; text-align: right; }
+.grouped-izoh { font-size: 12px; color: var(--text-tertiary); margin-top: 8px; font-style: italic; background: var(--bg-secondary); padding: 6px 10px; border-radius: var(--radius-md); }
+.grouped-total-row { display: flex; justify-content: space-between; font-weight: 700; border-top: 1.5px solid var(--border-secondary); margin-top: 6px; padding-top: 8px; font-size: 14px; }
+.sklad-search { margin-bottom: 1rem; }
+.num-cell { color: var(--text-tertiary); width: 32px; }
+.receipt-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.receipt-box { background: var(--bg-primary); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 380px; width: 100%; max-height: 85vh; overflow-y: auto; font-family: monospace; }
+.receipt-header { text-align: center; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 2px dashed var(--border-secondary); }
+.receipt-header .title { font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+.receipt-header .sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.receipt-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+.receipt-line { border-top: 1px dashed var(--border-tertiary); margin: 10px 0; }
+.receipt-item { margin-bottom: 8px; }
+.receipt-item .iname { font-size: 13px; font-weight: 600; }
+.receipt-item .idetail { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+.receipt-total { font-size: 15px; font-weight: 700; display: flex; justify-content: space-between; margin-top: 8px; padding-top: 8px; border-top: 2px dashed var(--border-secondary); }
+.receipt-close { margin-top: 1rem; }
+.mijoz-wrap { position: relative; }
+.sana-note { font-size: 11px; color: var(--text-tertiary); margin-top: -8px; margin-bottom: 12px; }
+.sync-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-tertiary); padding: 5px 12px; border-radius: 100px; background: var(--bg-secondary); margin-bottom: 1rem; }
+.sync-badge.syncing { color: var(--text-info); background: var(--bg-info); }
+.sync-badge.err { color: var(--text-danger); background: var(--bg-danger); }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #9aa0a6; }
+.sync-badge.syncing .sync-dot { background: #1967d2; }
+.sync-badge.err .sync-dot { background: #c5221f; }
+.filter-range-note { font-size: 11px; color: var(--text-tertiary); margin: -4px 0 1rem 0; min-height: 14px; }
+h1.page-title { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
+.loading-screen { display: flex; align-items: center; justify-content: center; padding: 4rem; color: var(--text-tertiary); font-size: 14px; gap: 8px; }
+.gear-icon::before { content: "⚙"; }
+.edit-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto auto; gap: 8px; align-items: flex-end; }
+@media (max-width: 700px) {
+  .edit-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">🍷 Alko Market — Sklad Boshqaruvi</h1>
+
+<div id="toast" class="toast"></div>
+<div id="receipt-modal"></div>
+<div id="sync-status" class="sync-badge"><span class="sync-dot"></span> <span id="sync-text">Ulanmoqda...</span></div>
+
+<div id="loading-screen" class="loading-screen">⏳ Ma'lumotlar yuklanmoqda...</div>
+
+<div id="app-root" style="display:none">
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('sklad')">📦 Sklad</button>
+  <button class="tab" onclick="showTab('kirim')">⬇️ Kirim</button>
+  <button class="tab" onclick="showTab('sotuv')">⬆️ Sotuv</button>
+  <button class="tab" onclick="showTab('qarz')">💳 Qarzlar</button>
+  <button class="tab" onclick="showTab('kirimhisobot')">📥 Kirim hisobot</button>
+  <button class="tab" onclick="showTab('hisobot')">📊 Sotuv hisobot</button>
+  <button class="tab" onclick="showTab('umumiy')">📈 Umumiy hisobot</button>
+</div>
+
+<!-- SKLAD -->
+<div id="sec-sklad" class="section active">
+  <div class="section-title">Hozirgi sklad holati</div>
+  <div id="sklad-metrics" class="metric-grid"></div>
+  <input type="text" class="sklad-search" id="sklad-search" placeholder="🔍 Aroq nomi bo'yicha qidirish..." oninput="renderSklad()">
+  <div class="card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>№</th><th>Aroq nomi</th><th>Litr</th><th>Blokda dona</th><th>Bloklar</th><th>Donalar</th><th>1 dona narx</th><th>Holat</th><th>Amallar</th></tr></thead>
+        <tbody id="sklad-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- KIRIM -->
+<div id="sec-kirim" class="section">
+  <div class="section-title">Sklaga kirim</div>
+  <div class="kirim-mode-toggle">
+    <button class="mode-btn active" id="kmode-mavjud" onclick="setKirimMode('mavjud')">📦 Mavjud aroqqa qo'shish</button>
+    <button class="mode-btn" id="kmode-yangi" onclick="setKirimMode('yangi')">➕ Yangi aroq</button>
+  </div>
+
+  <div class="card" id="kirim-mavjud-block">
+    <div id="mavjud-list"></div>
+    <button class="add-btn" onclick="addMavjudRow()" style="margin-top:8px">➕ Yana qator qo'shish</button>
+    <label>Sana</label>
+    <input type="date" id="kirim-sana-mavjud" onchange="updateKirimSanaMavjudDisplay()">
+    <div class="sana-note" id="kirim-sana-mavjud-display"></div>
+    <button class="primary" id="kirim-mavjud-save-btn" onclick="kirimMavjudSaqla()">💾 Kirimni saqlash</button>
+  </div>
+
+  <div class="card" id="kirim-yangi-block" style="display:none">
+    <div id="aroq-list">
+      <div class="aroq-row" id="arow0">
+        <div style="flex:2; min-width:160px"><label>Aroq nomi</label><input type="text" placeholder="Masalan: Absolut Vodka" id="aroq0-nom" oninput="checkDuplicate(0)"></div>
+        <div style="flex:1; min-width:80px"><label>Litr</label><select id="aroq0-litr" onchange="checkDuplicate(0)"><option value="0.5">0.5L</option><option value="0.7">0.7L</option><option value="1">1L</option><option value="0.45">0.45L</option><option value="0.25">0.25L</option><option value="0.1">0.1L</option><option value="3">3L</option></select></div>
+        <div style="flex:1; min-width:90px"><label>Blokda dona</label><input type="number" min="1" value="15" id="aroq0-blokdona"></div>
+        <div style="flex:1; min-width:80px"><label>Bloklar</label><input type="number" min="1" value="1" id="aroq0-blok"></div>
+        <div style="flex:1; min-width:100px"><label>1 dona narx</label><input type="number" min="0" placeholder="0" id="aroq0-narx"></div>
+      </div>
+    </div>
+    <div class="basket-calc" id="yangi-warn" style="color:var(--text-warning)"></div>
+    <button class="add-btn" onclick="addAroqRow()">➕ Yana aroq qo'shish</button>
+    <label>Sana</label>
+    <input type="date" id="kirim-sana" onchange="updateKirimSanaDisplay()">
+    <div class="sana-note" id="kirim-sana-display"></div>
+    <button class="primary" id="kirim-yangi-save-btn" onclick="kirimSaqla()">💾 Kirimni saqlash</button>
+  </div>
+</div>
+
+<!-- SOTUV -->
+<div id="sec-sotuv" class="section">
+  <div class="section-title">Sotuv yozish (savatcha)</div>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Mijoz / Do'kon <span style="color:var(--text-danger)">*</span></label>
+        <div class="mijoz-wrap">
+          <input type="text" id="sot-mijoz" placeholder="Masalan: Asad" oninput="checkMijozField(); renderMijozDropdown()" onfocus="renderMijozDropdown()" autocomplete="off">
+          <div class="combo-dropdown" id="mijoz-dropdown"></div>
+        </div>
+      </div>
+      <div><label>Sana</label><input type="date" id="sot-sana" onchange="updateSotSanaDisplay()"><div class="sana-note" id="sot-sana-display"></div></div>
+    </div>
+    <div class="field-required" id="mijoz-required"></div>
+    <div id="basket-list"></div>
+    <button class="add-btn" onclick="addBasketRow()">➕ Yana aroq qo'shish (shu mijozga)</button>
+    <label>To'lov turi <span style="color:var(--text-danger)">*</span></label>
+    <div class="tolov-toggle">
+      <button class="tolov-btn" id="btn-naqd" onclick="selectTolov('naqd')">💵 Naqd pul</button>
+      <button class="tolov-btn" id="btn-qarz" onclick="selectTolov('qarz')">💳 Qarzga</button>
+      <button class="tolov-btn" id="btn-vitrina" onclick="selectTolov('vitrina')">🏪 Do'konga (vitrina)</button>
+    </div>
+    <div class="field-required" id="tolov-required">To'lov turini tanlash shart!</div>
+    <div class="qarz-warning" id="qarz-warn">⚠️ Qarzga beriladi — mijoz ismi to'liq yozing!</div>
+    <div class="vitrina-info" id="vitrina-info">ℹ️ Do'konga vitrina/namuna uchun beriladi — narxsiz, faqat hisobotda saqlanadi va skladdan ayriladi.</div>
+    <div><label>Izoh (ixtiyoriy)</label><input type="text" id="sot-izoh" placeholder="Qo'shimcha ma'lumot"></div>
+    <div class="calc-box" id="basket-total">Jami: 0 so'm</div>
+    <button class="primary" id="sotuv-save-btn" onclick="sotuvSaqla()">✅ Sotuvni saqlash</button>
+  </div>
+  <div class="section-title" style="margin-top:1.5rem">Sotuv tarixi <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(bosib chek ko'rish mumkin)</span></div>
+  <div class="filter-row">
+    <input type="text" id="filter-aroq-text" placeholder="🔍 Aroq nomi bo'yicha qidirish..." oninput="renderSotuvlar()">
+    <input type="text" id="filter-mijoz-text" placeholder="🔍 Mijoz nomi bo'yicha qidirish..." oninput="renderSotuvlar()">
+    <select id="filter-tolov" onchange="renderSotuvlar()"><option value="">Barcha to'lovlar</option><option value="naqd">Naqd</option><option value="qarz">Qarz</option><option value="vitrina">Do'konga (vitrina)</option></select>
+    <input type="date" id="filter-sana" onchange="renderSotuvlar(); updateFilterSanaDisplay()">
+  </div>
+  <div class="filter-range-note" id="filter-sana-display"></div>
+  <div id="sotuv-list"></div>
+</div>
+
+<!-- QARZLAR -->
+<div id="sec-qarz" class="section">
+  <div class="section-title">Qarz ro'yxati <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(bosib chek ko'rish mumkin)</span></div>
+  <div id="qarz-metrics" class="metric-grid"></div>
+  <div class="filter-row">
+    <input type="text" id="filter-qarz-mijoz" placeholder="🔍 Mijoz nomi bo'yicha qidirish..." oninput="renderQarzlar()">
+  </div>
+  <div id="qarz-list"></div>
+</div>
+
+<!-- KIRIM HISOBOT -->
+<div id="sec-kirimhisobot" class="section">
+  <div class="section-title">Kirim tarixi — qaysi kuni, soatda, qancha kirim bo'lgan</div>
+  <div class="filter-row">
+    <input type="date" id="kh-dan" onchange="updateKhFilterDisplay()">
+    <input type="date" id="kh-gacha" onchange="updateKhFilterDisplay()">
+    <button onclick="renderKirimHisobot()" style="padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-secondary); cursor:pointer; background:transparent; color:var(--text-primary); flex-shrink:0; font-weight:500;">Ko'rsat</button>
+  </div>
+  <div class="filter-range-note" id="kh-filter-display"></div>
+  <div id="kh-metrics" class="metric-grid" style="margin-top:1rem"></div>
+  <div class="card" style="margin-top:1rem">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Sana</th><th>Soat</th><th>Aroq</th><th>Litr</th><th>Bloklar</th><th>Donalar</th><th>Narx</th></tr></thead>
+        <tbody id="kh-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- HISOBOT -->
+<div id="sec-hisobot" class="section">
+  <div class="section-title">Sotuv hisobot <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(bosib chek ko'rish mumkin)</span></div>
+  <div class="filter-row">
+    <input type="date" id="hisob-dan" onchange="updateHisobFilterDisplay()">
+    <input type="date" id="hisob-gacha" onchange="updateHisobFilterDisplay()">
+    <input type="text" id="hisob-mijoz" placeholder="🔍 Mijoz nomi bo'yicha qidirish...">
+    <button onclick="renderHisobot()" style="padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border-secondary); cursor:pointer; background:transparent; color:var(--text-primary); flex-shrink:0; font-weight:500;">Ko'rsat</button>
+  </div>
+  <div class="filter-range-note" id="hisob-filter-display"></div>
+  <div id="hisob-metrics" class="metric-grid" style="margin-top:1rem"></div>
+  <div id="hisob-list" style="margin-top:1rem"></div>
+</div>
+
+<!-- UMUMIY HISOBOT -->
+<div id="sec-umumiy" class="section">
+  <div class="section-title">Umumiy hisobot — ish boshlagandan hozirgacha</div>
+  <div id="umumiy-metrics" class="metric-grid"></div>
+  <div class="card" style="margin-top:1rem">
+    <div class="section-title" style="font-size:14px; margin-bottom:8px;">Eng ko'p sotilgan aroqlar (TOP 10)</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>№</th><th>Aroq</th><th>Jami blok</th><th>Jami dona</th><th>Jami summa</th></tr></thead>
+        <tbody id="umumiy-top-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1rem">
+    <div class="section-title" style="font-size:14px; margin-bottom:8px;">Eng ko'p xarid qilgan mijozlar</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>№</th><th>Mijoz</th><th>Sotuvlar soni</th><th>Jami blok</th><th>Jami summa</th></tr></thead>
+        <tbody id="umumiy-mijoz-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ============ SUPABASE BACKEND CONFIG ============ */
+const SUPABASE_URL = "https://mzuwbyvbogmhbehzoobb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im16dXdieXZib2dtaGJlaHpvb2JiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxOTM3NjMsImV4cCI6MjA5Nzc2OTc2M30.c6kaBIWSmlav5jKW7yP2_H3fWuvZ-2tO9TXwfvWCdTE";
+const SUPABASE_TABLE = "alko_data";
+const REST_URL = SUPABASE_URL + "/rest/v1/" + SUPABASE_TABLE;
+
+let cache = { sklad:{}, sotuv:[], kirim:[], mijozlar:[] };
+
+function setSyncStatus(text, syncing, isErr) {
+  const el = document.getElementById('sync-status');
+  const txt = document.getElementById('sync-text');
+  txt.textContent = text;
+  el.classList.toggle('syncing', !!syncing);
+  el.classList.toggle('err', !!isErr);
+}
+
+async function supabaseFetchAll() {
+  const res = await fetch(REST_URL + "?select=key,value", {
+    headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY }
+  });
+  if(!res.ok) throw new Error("Fetch failed: " + res.status);
+  return await res.json();
+}
+
+async function supabaseUpsert(key, value) {
+  const res = await fetch(REST_URL, {
+    method: "POST",
+    headers: {
+      "apikey": SUPABASE_ANON_KEY, "Authorization": "Bearer " + SUPABASE_ANON_KEY,
+      "Content-Type": "application/json", "Prefer": "resolution=merge-duplicates"
+    },
+    body: JSON.stringify([{ key: key, value: value, updated_at: new Date().toISOString() }])
+  });
+  if(!res.ok) { const errText = await res.text().catch(()=>''); throw new Error("Save failed: " + res.status + " " + errText); }
+  return true;
+}
+
+async function loadAllFromBackend() {
+  setSyncStatus('Yuklanmoqda...', true, false);
+  try {
+    const rows = await supabaseFetchAll();
+    const map = {};
+    rows.forEach(r => { map[r.key] = r.value; });
+    cache.sklad = map.sklad || {};
+    cache.sotuv = map.sotuv || [];
+    cache.kirim = map.kirim || [];
+    cache.mijozlar = map.mijozlar || [];
+    setSyncStatus('Ulangan (umumiy)', false, false);
+    return true;
+  } catch(e) {
+    setSyncStatus("Ulanishda xatolik! Internetni tekshiring.", false, true);
+    console.error(e);
+    return false;
+  }
+}
+
+async function persist(which) {
+  setSyncStatus('Saqlanmoqda...', true, false);
+  try {
+    await supabaseUpsert(which, cache[which]);
+    setSyncStatus('Saqlangan (umumiy)', false, false);
+  } catch(e) {
+    setSyncStatus("Saqlashda xatolik! Qaytadan urinib ko'ring.", false, true);
+    console.error(e);
+    showToast("⚠️ Saqlashda xatolik yuz berdi! Internetni tekshirib, qaytadan urinib ko'ring.");
+  }
+}
+
+function load(which) { return cache[which]; }
+function save(which, data) { cache[which] = data; persist(which); }
+
+let aroqRowCount = 1, mavjudRowCount = 0, basketRowCount = 0;
+
+const CATALOG = [
+  {nom:"Konyak Gold Uzbekistan 25",litr:"0.7",blokdona:6,narx:136500},
+  {nom:"Konyak Gold Uzbekistan",litr:"0.5",blokdona:15,narx:63500},
+  {nom:"Alpine",litr:"0.5",blokdona:15,narx:42000},
+  {nom:"LUXUZ PRIME",litr:"0.7",blokdona:6,narx:145000},
+  {nom:"ROYAL LOUIS XO",litr:"0.7",blokdona:4,narx:199000},
+  {nom:"Laven Mineral",litr:"0.5",blokdona:15,narx:42950},
+  {nom:"NEW UZBEKISTAN Premium",litr:"0.5",blokdona:12,narx:65900},
+  {nom:"NEW UZBEKISTAN Premium",litr:"0.7",blokdona:12,narx:79500},
+  {nom:"New E Factor Soft",litr:"0.5",blokdona:15,narx:59000},
+  {nom:"New E Factor Soft",litr:"0.7",blokdona:12,narx:72000},
+  {nom:"Bebaxo",litr:"0.5",blokdona:15,narx:38000},
+  {nom:"Bebaxo",litr:"0.7",blokdona:12,narx:50000},
+  {nom:"Bulbash",litr:"0.7",blokdona:12,narx:41000},
+  {nom:"Chistaya",litr:"0.5",blokdona:15,narx:35000},
+  {nom:"Bulbash Osobaya",litr:"0.5",blokdona:12,narx:38500},
+  {nom:"E Factor Gold",litr:"0.5",blokdona:15,narx:57500},
+  {nom:"E Factor Gold",litr:"0.7",blokdona:12,narx:69500},
+  {nom:"Medovaya s Limonom",litr:"0.45",blokdona:15,narx:38500},
+  {nom:"ZING",litr:"0.7",blokdona:9,narx:110000},
+  {nom:"Talaya Prirodnaya",litr:"0.7",blokdona:12,narx:54000},
+  {nom:"Talaya Prirodnaya",litr:"0.5",blokdona:15,narx:42000},
+  {nom:"E Factor Rising Moon",litr:"0.7",blokdona:12,narx:69900},
+  {nom:"E Factor Rising Moon",litr:"0.5",blokdona:15,narx:58500},
+  {nom:"Eliksir Afsara",litr:"0.5",blokdona:15,narx:35000},
+  {nom:"Brilliant Samarqand",litr:"0.5",blokdona:15,narx:35000},
+  {nom:"Brilliant Samarqand",litr:"0.7",blokdona:12,narx:46000},
+  {nom:"Eliksir Afsara",litr:"0.7",blokdona:12,narx:46300},
+  {nom:"Eliksir Afsara",litr:"1",blokdona:9,narx:69100},
+  {nom:"Cristalion",litr:"0.7",blokdona:6,narx:167000},
+  {nom:"CAIMAN",litr:"0.7",blokdona:12,narx:64000},
+  {nom:"BAIKAL",litr:"0.5",blokdona:15,narx:57500},
+  {nom:"BAIKAL",litr:"0.7",blokdona:12,narx:71400},
+  {nom:"GOLD UZBEKISTON (12)",litr:"0.7",blokdona:6,narx:227000},
+  {nom:"SEVRYUGA",litr:"0.5",blokdona:15,narx:60600},
+  {nom:"SEVRYUGA",litr:"0.7",blokdona:12,narx:74400},
+  {nom:"Legka Ruka Komandira",litr:"0.5",blokdona:12,narx:37800},
+  {nom:"Legka Ruka Komandira",litr:"0.7",blokdona:12,narx:49000},
+  {nom:"7 Element",litr:"0.5",blokdona:15,narx:43200},
+  {nom:"Ak Kula",litr:"0.5",blokdona:15,narx:39000},
+  {nom:"Ak Kula",litr:"0.7",blokdona:12,narx:52250},
+  {nom:"Medovaya Citrus Limon",litr:"0.7",blokdona:12,narx:28500},
+  {nom:"The SEVRUGA",litr:"0.7",blokdona:6,narx:130000},
+  {nom:"BERINGOFF Afsar",litr:"0.5",blokdona:15,narx:54000},
+  {nom:"BERINGOFF Afsar",litr:"0.7",blokdona:12,narx:66000},
+  {nom:"GOLD UZBEKISTON Exclusive",litr:"0.7",blokdona:6,narx:177000},
+  {nom:"Green Life",litr:"0.5",blokdona:15,narx:32000},
+  {nom:"Jiggermann Prestige",litr:"0.7",blokdona:6,narx:65000},
+  {nom:"Bayan Shirin Premium",litr:"0.7",blokdona:4,narx:175500},
+  {nom:"Green Life",litr:"0.7",blokdona:12,narx:42000},
+  {nom:"Tsarskaya Bashnya",litr:"0.25",blokdona:24,narx:18500},
+  {nom:"SILVER",litr:"0.7",blokdona:12,narx:44000},
+  {nom:"Kuza",litr:"0.25",blokdona:24,narx:17500},
+  {nom:"Beliy",litr:"0.25",blokdona:24,narx:17200},
+  {nom:"FORTUNA",litr:"0.7",blokdona:12,narx:54000},
+  {nom:"Polyarnaya Zvezda",litr:"0.5",blokdona:12,narx:36000},
+  {nom:"Polyarnaya Zvezda",litr:"0.7",blokdona:12,narx:50000},
+  {nom:"FORTUNA",litr:"1",blokdona:9,narx:76200},
+  {nom:"Derevyanka",litr:"0.5",blokdona:15,narx:33800},
+  {nom:"STOPKA",litr:"0.1",blokdona:36,narx:8000},
+  {nom:"Puzaryok",litr:"3",blokdona:2,narx:189000},
+  {nom:"Ecolife",litr:"0.7",blokdona:12,narx:45320},
+  {nom:"AYYU BLACK",litr:"0.7",blokdona:12,narx:45320},
+  {nom:"Senator Kalibr 57 mm",litr:"0.7",blokdona:12,narx:48600},
+  {nom:"Pushkin",litr:"1",blokdona:9,narx:57900},
+  {nom:"Bufet Brend",litr:"1",blokdona:9,narx:54300},
+  {nom:"Zapovednik Tsarskaya Polyana",litr:"0.5",blokdona:15,narx:35000},
+  {nom:"Zapovednik Tsarskaya Polyana",litr:"0.7",blokdona:12,narx:46500}
+];
+
+function today() { return new Date().toISOString().slice(0,10); }
+function nowTime() { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function fmt(n) { return Math.round(n||0).toLocaleString(); }
+function aroqKey(nom, litr) { return nom.trim() + '__' + litr; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function dateDisplay(isoDate) {
+  if(!isoDate) return '';
+  const parts = isoDate.split('-');
+  if(parts.length !== 3) return isoDate;
+  return `${parts[2]}.${parts[1]}.${parts[0]}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+
+async function bootstrapCatalogIfEmpty() {
+  if(Object.keys(cache.sklad).length > 0) return;
+  const fresh = {};
+  CATALOG.forEach(c=>{
+    const key = aroqKey(c.nom, c.litr);
+    fresh[key] = { nom: c.nom, litr: c.litr, blokdona: c.blokdona, blok: 0, narx: c.narx };
+  });
+  cache.sklad = fresh;
+  await persist('sklad');
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const tabs = ['sklad','kirim','sotuv','qarz','kirimhisobot','hisobot','umumiy'];
+  document.querySelectorAll('.tab')[tabs.indexOf(name)].classList.add('active');
+  document.getElementById('sec-'+name).classList.add('active');
+  if(name==='sklad') renderSklad();
+  if(name==='sotuv') {
+    if(basketRowCount===0) addBasketRow();
+    const sotSana = document.getElementById('sot-sana');
+    if(!sotSana.value) sotSana.value = today();
+    updateSotSanaDisplay();
+    updateFilterSanaDisplay();
+    renderSotuvlar();
+  }
+  if(name==='qarz') renderQarzlar();
+  if(name==='kirimhisobot') { updateKhFilterDisplay(); renderKirimHisobot(); }
+  if(name==='hisobot') { updateHisobFilterDisplay(); renderHisobot(); }
+  if(name==='umumiy') renderUmumiyHisobot();
+  if(name==='kirim') {
+    const i=document.getElementById('kirim-sana'); if(!i.value) i.value=today();
+    updateKirimSanaDisplay();
+    const i2=document.getElementById('kirim-sana-mavjud'); if(!i2.value) i2.value=today();
+    updateKirimSanaMavjudDisplay();
+    if(mavjudRowCount===0) addMavjudRow();
+  }
+}
+
+function updateKirimSanaDisplay() {
+  const v = document.getElementById('kirim-sana').value;
+  document.getElementById('kirim-sana-display').textContent = v ? 'Tanlangan sana: ' + dateDisplay(v) + ' (hohlasangiz boshqa sanani tanlang)' : '';
+}
+function updateKirimSanaMavjudDisplay() {
+  const v = document.getElementById('kirim-sana-mavjud').value;
+  document.getElementById('kirim-sana-mavjud-display').textContent = v ? 'Tanlangan sana: ' + dateDisplay(v) + ' (hohlasangiz boshqa sanani tanlang)' : '';
+}
+function updateSotSanaDisplay() {
+  const v = document.getElementById('sot-sana').value;
+  document.getElementById('sot-sana-display').textContent = v ? 'Tanlangan sana: ' + dateDisplay(v) + ' (hohlasangiz boshqa sanani tanlang)' : '';
+}
+function updateFilterSanaDisplay() {
+  const v = document.getElementById('filter-sana').value;
+  document.getElementById('filter-sana-display').textContent = v ? "Faqat shu sana ko'rsatilmoqda: " + dateDisplay(v) : '';
+}
+function updateKhFilterDisplay() {
+  const dan = document.getElementById('kh-dan').value;
+  const gacha = document.getElementById('kh-gacha').value;
+  let txt = '';
+  if(dan && gacha) txt = `Ko'rsatilmoqda: ${dateDisplay(dan)} dan ${dateDisplay(gacha)} gacha`;
+  else if(dan) txt = `Ko'rsatilmoqda: ${dateDisplay(dan)} dan hozirgacha`;
+  else if(gacha) txt = `Ko'rsatilmoqda: ${dateDisplay(gacha)} gacha`;
+  else txt = "Barcha sanalar ko'rsatilmoqda";
+  document.getElementById('kh-filter-display').textContent = txt;
+}
+function updateHisobFilterDisplay() {
+  const dan = document.getElementById('hisob-dan').value;
+  const gacha = document.getElementById('hisob-gacha').value;
+  let txt = '';
+  if(dan && gacha) txt = `Ko'rsatilmoqda: ${dateDisplay(dan)} dan ${dateDisplay(gacha)} gacha`;
+  else if(dan) txt = `Ko'rsatilmoqda: ${dateDisplay(dan)} dan hozirgacha`;
+  else if(gacha) txt = `Ko'rsatilmoqda: ${dateDisplay(gacha)} gacha`;
+  else txt = "Barcha sanalar ko'rsatilmoqda";
+  document.getElementById('hisob-filter-display').textContent = txt;
+}
+
+/* ============ SKLAD ============ */
+
+function renderSklad() {
+  const sklad = load('sklad');
+  const search = (document.getElementById('sklad-search')?.value||'').toLowerCase().trim();
+  let keys = Object.keys(sklad);
+  if(search) keys = keys.filter(k=>sklad[k].nom.toLowerCase().includes(search));
+  const tbody = document.getElementById('sklad-tbody');
+  const metrics = document.getElementById('sklad-metrics');
+  const allKeys = Object.keys(sklad);
+  const totalBlok = allKeys.reduce((s,k)=>s+(sklad[k].blok||0),0);
+  const totalDona = allKeys.reduce((s,k)=>s+(sklad[k].blok||0)*(sklad[k].blokdona||1),0);
+  const withStock = allKeys.filter(k=>sklad[k].blok>0).length;
+  metrics.innerHTML=`
+    <div class="metric"><div class="metric-label">Jami turlar</div><div class="metric-val">${allKeys.length}</div></div>
+    <div class="metric m-green"><div class="metric-label">Skladda bor turlar</div><div class="metric-val">${withStock}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami bloklar</div><div class="metric-val">${totalBlok}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami donalar</div><div class="metric-val">${totalDona}</div></div>
+  `;
+  if(!keys.length) { tbody.innerHTML='<tr><td colspan="9" class="empty">Hech narsa topilmadi</td></tr>'; return; }
+  // skladda bor (blok>0) birinchi, keyin nomi bo'yicha, so'ng yo'qlar nomi bo'yicha
+  keys.sort((a,b)=>{
+    const ab = sklad[a].blok>0 ? 0 : 1;
+    const bb = sklad[b].blok>0 ? 0 : 1;
+    if(ab !== bb) return ab - bb;
+    return sklad[a].nom.localeCompare(sklad[b].nom);
+  });
+  tbody.innerHTML=keys.map((k,i)=>{
+    const it = sklad[k];
+    const b=it.blok||0;
+    const bd=it.blokdona||1;
+    const h=b===0?'<span class="badge badge-gray">Yo\'q</span>':b<=3?'<span class="badge badge-amber">Kam</span>':'<span class="badge badge-green">Yetarli</span>';
+    return `<tr data-row-key="${esc(k)}"><td class="num-cell">${i+1}</td><td>${esc(it.nom)}</td><td>${it.litr}L</td><td>${bd}</td><td><b>${b}</b></td><td>${b*bd}</td><td>${it.narx?fmt(it.narx)+' so\'m':'—'}</td><td>${h}</td><td><button class="icon-btn" data-action="edit" data-key="${esc(k)}">✏️ Edit</button><button class="icon-btn danger" data-action="delete" data-key="${esc(k)}">🗑️ O'chir</button></td></tr>`;
+  }).join('');
+  tbody.querySelectorAll('button[data-action="edit"]').forEach(btn=>btn.addEventListener('click', ()=>openEdit(btn.dataset.key)));
+  tbody.querySelectorAll('button[data-action="delete"]').forEach(btn=>btn.addEventListener('click', ()=>askDelete(btn.dataset.key)));
+}
+
+function openEdit(key) {
+  const sklad = load('sklad');
+  const it = sklad[key];
+  if(!it) return;
+  document.querySelectorAll('tr[data-edit-key]').forEach(r=>r.remove());
+  const tbody = document.getElementById('sklad-tbody');
+  const targetRow = tbody.querySelector(`tr[data-row-key="${key.replace(/"/g,'')}"]`);
+  const tr = document.createElement('tr');
+  tr.dataset.editKey = key;
+  tr.innerHTML = `<td colspan="9">
+    <div class="edit-grid">
+      <div><label>Nomi</label><input type="text" id="edit-nom" value="${esc(it.nom)}"></div>
+      <div><label>Litr</label><select id="edit-litr"><option value="0.5" ${it.litr==='0.5'?'selected':''}>0.5L</option><option value="0.7" ${it.litr==='0.7'?'selected':''}>0.7L</option><option value="1" ${it.litr==='1'?'selected':''}>1L</option><option value="0.45" ${it.litr==='0.45'?'selected':''}>0.45L</option><option value="0.25" ${it.litr==='0.25'?'selected':''}>0.25L</option><option value="0.1" ${it.litr==='0.1'?'selected':''}>0.1L</option><option value="3" ${it.litr==='3'?'selected':''}>3L</option></select></div>
+      <div><label>Blokda dona</label><input type="number" id="edit-blokdona" value="${it.blokdona}"></div>
+      <div><label>Bloklar</label><input type="number" id="edit-blok" value="${it.blok}"></div>
+      <div><label>1 dona narx</label><input type="number" id="edit-narx" value="${it.narx||0}"></div>
+      <button class="primary" id="edit-save-btn" style="width:auto; padding:8px 14px">✅ Saqlash</button>
+      <button class="icon-btn" id="edit-cancel-btn">✕ Bekor</button>
+    </div>
+  </td>`;
+  if(targetRow) targetRow.after(tr); else tbody.appendChild(tr);
+  document.getElementById('edit-save-btn').addEventListener('click', ()=>saveEdit(key));
+  document.getElementById('edit-cancel-btn').addEventListener('click', ()=>renderSklad());
+}
+
+function saveEdit(oldKey) {
+  const sklad = load('sklad');
+  const nom = document.getElementById('edit-nom').value.trim();
+  const litr = document.getElementById('edit-litr').value;
+  const blokdona = parseInt(document.getElementById('edit-blokdona').value)||1;
+  const blok = parseInt(document.getElementById('edit-blok').value)||0;
+  const narx = parseInt(document.getElementById('edit-narx').value)||0;
+  if(!nom) { alert("Nom bo'sh bo'lmasligi kerak!"); return; }
+  if(blok < 0) { alert("Bloklar soni manfiy bo'lmasligi kerak!"); return; }
+  if(blokdona < 1) { alert("Blokda dona kamida 1 bo'lishi kerak!"); return; }
+  const newKey = aroqKey(nom, litr);
+  delete sklad[oldKey];
+  if(sklad[newKey] && newKey !== oldKey) {
+    sklad[newKey].blok += blok;
+    sklad[newKey].blokdona = blokdona;
+    if(narx>0) sklad[newKey].narx = narx;
+    showToast(`Birlashtirildi: "${nom} ${litr}L" allaqachon bor edi, qo'shildi`);
+  } else { sklad[newKey] = { nom, litr, blokdona, blok, narx }; }
+  save('sklad', sklad);
+  showToast('✅ Saqlandi — narx/blok yangilandi');
+  renderSklad();
+}
+
+function askDelete(key) {
+  const tbody = document.getElementById('sklad-tbody');
+  document.querySelectorAll('tr[data-confirm-key]').forEach(r=>r.remove());
+  const sklad = load('sklad');
+  const it = sklad[key];
+  if(!it) return;
+  const targetRow = tbody.querySelector(`tr[data-row-key="${key.replace(/"/g,'')}"]`);
+  const tr = document.createElement('tr');
+  tr.dataset.confirmKey = key;
+  tr.innerHTML = `<td colspan="9" style="background:var(--bg-secondary)">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap">
+      <span>⚠️ "${esc(it.nom)} ${it.litr}L" ni skladdan butunlay o'chirmoqchimisiz? (${it.blok} blok yo'qoladi)</span>
+      <div style="display:flex; gap:8px">
+        <button class="danger-confirm" id="confirm-del-yes">🗑️ Ha, o'chir</button>
+        <button class="cancel-confirm" id="confirm-del-no">Bekor qilish</button>
+      </div>
+    </div>
+  </td>`;
+  if(targetRow) targetRow.after(tr);
+  document.getElementById('confirm-del-yes').addEventListener('click', ()=>doDelete(key));
+  document.getElementById('confirm-del-no').addEventListener('click', ()=>renderSklad());
+}
+
+function doDelete(key) {
+  const sklad = load('sklad');
+  delete sklad[key];
+  save('sklad', sklad);
+  showToast("🗑️ O'chirildi");
+  renderSklad();
+}
+
+/* ============ KIRIM ============ */
+
+function addAroqRow() {
+  const i = aroqRowCount++;
+  const div = document.createElement('div');
+  div.className='aroq-row'; div.id='arow'+i;
+  div.innerHTML=`<div style="flex:2; min-width:160px"><label>Aroq nomi</label><input type="text" placeholder="Aroq nomi" id="aroq${i}-nom" oninput="checkDuplicate(${i})"></div><div style="flex:1; min-width:80px"><label>Litr</label><select id="aroq${i}-litr" onchange="checkDuplicate(${i})"><option value="0.5">0.5L</option><option value="0.7">0.7L</option><option value="1">1L</option><option value="0.45">0.45L</option><option value="0.25">0.25L</option><option value="0.1">0.1L</option><option value="3">3L</option></select></div><div style="flex:1; min-width:90px"><label>Blokda dona</label><input type="number" min="1" value="15" id="aroq${i}-blokdona"></div><div style="flex:1; min-width:80px"><label>Bloklar</label><input type="number" min="1" value="1" id="aroq${i}-blok"></div><div style="flex:1; min-width:100px"><label>1 dona narx</label><input type="number" min="0" placeholder="0" id="aroq${i}-narx"></div><button class="remove-btn" onclick="this.parentElement.remove()">✕</button>`;
+  document.getElementById('aroq-list').appendChild(div);
+}
+
+function checkDuplicate(i) {
+  const nom = document.getElementById('aroq'+i+'-nom')?.value.trim();
+  const litr = document.getElementById('aroq'+i+'-litr')?.value;
+  const warn = document.getElementById('yangi-warn');
+  if(!nom) { warn.textContent=''; return; }
+  const sklad = load('sklad');
+  const key = aroqKey(nom, litr);
+  if(sklad[key]) warn.innerHTML = `⚠️ "${esc(nom)} ${litr}L" skladda allaqachon bor (${sklad[key].blok} blok). Saqlasangiz ustiga qo'shiladi, dublikat yaratilmaydi.`;
+  else warn.textContent = '';
+}
+
+function kirimSaqla() {
+  const sana = document.getElementById('kirim-sana').value || today();
+  const time = nowTime();
+  const sklad = load('sklad');
+  const kirimlar = load('kirim');
+  const rows = document.querySelectorAll('#aroq-list .aroq-row');
+  let count=0;
+  rows.forEach(row=>{
+    const idx=row.id.replace('arow','');
+    const nom=document.getElementById('aroq'+idx+'-nom')?.value.trim();
+    const litr=document.getElementById('aroq'+idx+'-litr')?.value;
+    const blokdona=parseInt(document.getElementById('aroq'+idx+'-blokdona')?.value)||1;
+    const blok=parseInt(document.getElementById('aroq'+idx+'-blok')?.value)||0;
+    const narx=parseInt(document.getElementById('aroq'+idx+'-narx')?.value)||0;
+    if(!nom||blok<=0) return;
+    const key = aroqKey(nom, litr);
+    if(!sklad[key]) sklad[key]={nom, litr, blok:0, narx:0, blokdona:blokdona};
+    sklad[key].blok+=blok;
+    sklad[key].blokdona=blokdona;
+    if(narx>0) sklad[key].narx=narx;
+    kirimlar.push({sana, time, key, nom, litr, blokdona, blok, narx});
+    count++;
+  });
+  if(!count){alert("Kamida bitta aroq kiriting!");return;}
+  save('sklad',sklad); save('kirim',kirimlar);
+  showToast(`✅ ${count} ta aroq kirim qilindi (${dateDisplay(sana)})`);
+  document.getElementById('aroq-list').innerHTML='';
+  aroqRowCount=0;
+  addAroqRow();
+  document.getElementById('yangi-warn').textContent='';
+  renderSklad();
+}
+
+function sklad_sorted_keys(sklad, onlyStock) {
+  let keys = Object.keys(sklad);
+  if(onlyStock) keys = keys.filter(k=>sklad[k].blok>0);
+  keys.sort((a,b)=>{
+    const ab = sklad[a].blok>0 ? 0 : 1;
+    const bb = sklad[b].blok>0 ? 0 : 1;
+    if(ab !== bb) return ab - bb;
+    return sklad[a].nom.localeCompare(sklad[b].nom);
+  });
+  return keys;
+}
+
+function setKirimMode(mode) {
+  document.getElementById('kmode-mavjud').classList.toggle('active', mode==='mavjud');
+  document.getElementById('kmode-yangi').classList.toggle('active', mode==='yangi');
+  document.getElementById('kirim-mavjud-block').style.display = mode==='mavjud'?'block':'none';
+  document.getElementById('kirim-yangi-block').style.display = mode==='yangi'?'block':'none';
+}
+
+function buildCombo(containerId, comboId, placeholder, onSelect, onlyStock) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = `<label>Aroq</label><div class="combo-wrap" id="${comboId}-wrap"><input type="text" class="combo-input" id="${comboId}-input" placeholder="${placeholder}" autocomplete="off"><input type="hidden" id="${comboId}-value"><div class="combo-dropdown" id="${comboId}-dropdown"></div></div>`;
+  const input = document.getElementById(comboId+'-input');
+  const dropdown = document.getElementById(comboId+'-dropdown');
+  const hidden = document.getElementById(comboId+'-value');
+  function renderOptions(filterText) {
+    const sklad2 = load('sklad');
+    const allKeys = sklad_sorted_keys(sklad2, onlyStock);
+    const ft = (filterText||'').toLowerCase().trim();
+    const filtered = ft ? allKeys.filter(k=>sklad2[k].nom.toLowerCase().includes(ft)) : allKeys;
+    if(!filtered.length) { dropdown.innerHTML = '<div class="combo-empty">Topilmadi</div>'; return; }
+    dropdown.innerHTML = filtered.map(k=>{
+      const it = sklad2[k];
+      const outOfStock = it.blok<=0;
+      const stockNote = it.blok>0 ? `${it.blok} blok bor` : `skladda yo'q`;
+      return `<div class="combo-option ${outOfStock?'out-of-stock':''}" data-key="${esc(k)}"><span>${esc(it.nom)} ${it.litr}L</span><span class="sub">${stockNote}</span></div>`;
+    }).join('');
+    dropdown.querySelectorAll('.combo-option').forEach(opt=>{
+      opt.addEventListener('mousedown', (e)=>{
+        e.preventDefault();
+        const key = opt.dataset.key;
+        const it = sklad2[key];
+        input.value = `${it.nom} ${it.litr}L`;
+        hidden.value = key;
+        dropdown.classList.remove('open');
+        if(onSelect) onSelect(key);
+      });
+    });
+  }
+  input.addEventListener('focus', ()=>{ renderOptions(input.value && hidden.value ? '' : input.value); dropdown.classList.add('open'); });
+  input.addEventListener('input', ()=>{ hidden.value=''; renderOptions(input.value); dropdown.classList.add('open'); if(onSelect) onSelect(''); });
+  input.addEventListener('blur', ()=>{ setTimeout(()=>dropdown.classList.remove('open'), 150); });
+  return { input, hidden };
+}
+
+function addMavjudRow() {
+  const i = mavjudRowCount++;
+  const div = document.createElement('div');
+  div.className='aroq-row'; div.id='mrow'+i;
+  div.innerHTML=`<div id="mrow${i}-combo" style="flex:2; min-width:180px"></div><div style="flex:1; min-width:80px"><label>Qo'shiladigan blok</label><input type="number" min="1" value="1" id="mrow${i}-blok"></div><div style="flex:1; min-width:100px"><label>Yangi narx (ixtiyoriy)</label><input type="number" min="0" placeholder="o'zgartirmaslik" id="mrow${i}-narx"></div><button class="remove-btn" onclick="document.getElementById('mrow${i}').remove(); document.getElementById('mrow${i}-info')?.remove()">✕</button><div class="basket-calc" id="mrow${i}-info"></div>`;
+  document.getElementById('mavjud-list').appendChild(div);
+  buildCombo('mrow'+i+'-combo', 'mrow'+i, '🔍 qidirish va tanlash', (key)=>{
+    const info = document.getElementById('mrow'+i+'-info');
+    const sklad = load('sklad');
+    if(!key || !sklad[key]) { info.textContent=''; return; }
+    const it = sklad[key];
+    info.textContent = `Hozir: ${it.blok} blok (${it.blokdona} dona/blok), narx: ${it.narx?fmt(it.narx)+' so\'m':'kiritilmagan'}`;
+  }, false);
+}
+
+function kirimMavjudSaqla() {
+  const sana = document.getElementById('kirim-sana-mavjud').value || today();
+  const time = nowTime();
+  const sklad = load('sklad');
+  const kirimlar = load('kirim');
+  const rows = document.querySelectorAll('#mavjud-list .aroq-row');
+  let count=0;
+  rows.forEach(row=>{
+    const idx=row.id.replace('mrow','');
+    const key=document.getElementById('mrow'+idx+'-value')?.value;
+    const blok=parseInt(document.getElementById('mrow'+idx+'-blok')?.value)||0;
+    const narx=parseInt(document.getElementById('mrow'+idx+'-narx')?.value)||0;
+    if(!key||blok<=0||!sklad[key]) return;
+    sklad[key].blok+=blok;
+    if(narx>0) sklad[key].narx=narx;
+    kirimlar.push({sana, time, key, nom:sklad[key].nom, litr:sklad[key].litr, blokdona:sklad[key].blokdona, blok, narx});
+    count++;
+  });
+  if(!count){alert("Kamida bitta aroq tanlang va blok kiriting!");return;}
+  save('sklad',sklad); save('kirim',kirimlar);
+  showToast(`✅ ${count} ta aroq sklatga qo'shildi (${dateDisplay(sana)})`);
+  document.getElementById('mavjud-list').innerHTML='';
+  mavjudRowCount=0;
+  addMavjudRow();
+  renderSklad();
+}
+
+/* ============ SOTUV ============ */
+
+function getMijozlar() { return load('mijozlar'); }
+function saveMijoz(nom) {
+  if(!nom) return;
+  const list = getMijozlar();
+  if(!list.some(m=>m.toLowerCase()===nom.toLowerCase())) { list.push(nom); save('mijozlar', list); }
+}
+
+function renderMijozDropdown() {
+  const input = document.getElementById('sot-mijoz');
+  const dropdown = document.getElementById('mijoz-dropdown');
+  const ft = input.value.toLowerCase().trim();
+  const list = getMijozlar();
+  const filtered = ft ? list.filter(m=>m.toLowerCase().includes(ft)) : list;
+  if(!filtered.length) { dropdown.classList.remove('open'); dropdown.innerHTML=''; return; }
+  dropdown.innerHTML = filtered.map(m=>`<div class="combo-option" data-mijoz="${esc(m)}">${esc(m)}</div>`).join('');
+  dropdown.classList.add('open');
+  dropdown.querySelectorAll('.combo-option').forEach(opt=>{
+    opt.addEventListener('mousedown', (e)=>{
+      e.preventDefault();
+      input.value = opt.dataset.mijoz;
+      dropdown.classList.remove('open');
+      checkMijozField();
+    });
+  });
+}
+document.addEventListener('click', (e)=>{
+  const wrap = document.querySelector('.mijoz-wrap');
+  if(wrap && !wrap.contains(e.target)) { const dd = document.getElementById('mijoz-dropdown'); if(dd) dd.classList.remove('open'); }
+});
+
+function addBasketRow() {
+  const i = basketRowCount++;
+  const div = document.createElement('div');
+  div.className='basket-item'; div.id='brow'+i;
+  div.innerHTML = `<div class="basket-item-row"><div id="brow${i}-comboholder" style="flex:2; min-width:180px"></div><div style="flex:1; min-width:70px"><label>Blok</label><input type="number" min="1" value="1" id="brow${i}-blok" oninput="updateBasketCalc(${i})"></div><div style="flex:1; min-width:90px"><label>1 dona narx</label><input type="number" placeholder="0" id="brow${i}-narx" oninput="updateBasketCalc(${i})"></div><button class="remove-btn" onclick="document.getElementById('brow${i}').remove(); updateBasketTotal()">✕</button></div><div class="basket-calc" id="brow${i}-calc"></div>`;
+  document.getElementById('basket-list').appendChild(div);
+  buildCombo('brow'+i+'-comboholder', 'brow'+i, '🔍 qidirish va tanlash (skladda bor yoki yo\'q, hammasi)', ()=>onBasketAroqSelected(i), false);
+}
+
+function onBasketAroqSelected(i) {
+  // Aroq tanlanganida blok inputini har doim 1 ga tushiramiz, eski qiymat
+  // qolib ketishining oldini olish uchun (foydalanuvchi keyin o'zi o'zgartirishi mumkin).
+  const blokInput = document.getElementById('brow'+i+'-blok');
+  if(blokInput) blokInput.value = 1;
+  updateBasketCalc(i);
+}
+
+function getBasketItemData(idx) {
+  const blok = parseInt(document.getElementById('brow'+idx+'-blok')?.value)||0;
+  const narxInput = document.getElementById('brow'+idx+'-narx');
+  const narx = narxInput && !narxInput.disabled ? (parseInt(narxInput.value)||0) : 0;
+  const sklad = load('sklad');
+  const key = document.getElementById('brow'+idx+'-value')?.value;
+  if(!key) return null;
+  const item = sklad[key];
+  if(!item) return null;
+  const blokdona = item.blokdona||1;
+  const inStock = (item.blok||0) > 0;
+  const tashqi = !inStock;
+  return { tashqi, key, nom: item.nom, litr: item.litr, blokdona, blok, dona: blok*blokdona, narx, inStock, sklatdaBlok: item.blok||0 };
+}
+
+let currentTolov = '';
+
+function updateBasketCalc(idx) {
+  const data = getBasketItemData(idx);
+  const calc = document.getElementById('brow'+idx+'-calc');
+  if(!calc) return;
+  if(!data) { calc.textContent=''; calc.classList.remove('error','warn-tashqi'); updateBasketTotal(); return; }
+  calc.classList.remove('error','warn-tashqi');
+  if(data.tashqi) {
+    calc.classList.add('warn-tashqi');
+    let line = `ℹ️ "${esc(data.nom)} ${data.litr}L" bizning skladda yo'q (0 blok) — boshqa joydan olib sotilayotgan deb hisoblanadi, bizning skladdan ayirilmaydi.`;
+    if(data.narx>0) line += ` ${data.blok} blok × ${fmt(data.narx)} so'm = <b>${fmt(data.blok*data.narx)} so'm</b>`;
+    calc.innerHTML = line;
+    updateBasketTotal();
+    return;
+  }
+  if(data.narx>0) calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona × ${fmt(data.narx)} so'm = <b>${fmt(data.dona*data.narx)} so'm</b>`;
+  else if(currentTolov==='vitrina') calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona (vitrina — narxsiz)`;
+  else calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona (narxsiz)`;
+  if(data.blok > data.sklatdaBlok) {
+    calc.classList.add('error');
+    calc.innerHTML = `⚠️ Skladda faqat <b>${data.sklatdaBlok} blok</b> bor, ${data.blok} blok sota olmaysiz!`;
+  } else calc.innerHTML += ` — skladda ${data.sklatdaBlok} blok bor`;
+  updateBasketTotal();
+}
+
+function updateBasketTotal() {
+  let total = 0;
+  document.querySelectorAll('.basket-item').forEach(item=>{
+    const idx = item.id.replace('brow','');
+    const data = getBasketItemData(idx);
+    if(data && data.narx>0) { if(data.tashqi) total += data.blok*data.narx; else total += data.dona*data.narx; }
+  });
+  document.getElementById('basket-total').textContent = `Jami: ${fmt(total)} so'm`;
+}
+
+function checkMijozField() {
+  const mijoz = document.getElementById('sot-mijoz').value.trim();
+  document.getElementById('mijoz-required').textContent = mijoz ? '' : 'Mijoz / do\'kon nomi yozilishi shart!';
+}
+
+function selectTolov(t) {
+  currentTolov = t;
+  document.getElementById('btn-naqd').className = 'tolov-btn' + (t==='naqd'?' selected-naqd':'');
+  document.getElementById('btn-qarz').className = 'tolov-btn' + (t==='qarz'?' selected-qarz':'');
+  document.getElementById('btn-vitrina').className = 'tolov-btn' + (t==='vitrina'?' selected-vitrina':'');
+  document.getElementById('qarz-warn').style.display = t==='qarz'?'block':'none';
+  document.getElementById('vitrina-info').style.display = t==='vitrina'?'block':'none';
+  document.getElementById('tolov-required').textContent = t ? '' : "To'lov turini tanlash shart!";
+  document.querySelectorAll('[id^=brow][id$=-narx]').forEach(inp=>{
+    if(t==='vitrina') { inp.value=''; inp.disabled=true; inp.placeholder='vitrina — narxsiz'; }
+    else { inp.disabled=false; if(inp.placeholder==='vitrina — narxsiz') inp.placeholder='0'; }
+  });
+  document.querySelectorAll('.basket-item').forEach(item=>{ const idx = item.id.replace('brow',''); updateBasketCalc(idx); });
+}
+
+function resetBasketForm() {
+  document.getElementById('sot-mijoz').value='';
+  document.getElementById('mijoz-required').textContent='';
+  document.getElementById('sot-izoh').value='';
+  document.getElementById('basket-list').innerHTML='';
+  basketRowCount=0;
+  addBasketRow();
+  currentTolov='';
+  document.getElementById('btn-naqd').className='tolov-btn';
+  document.getElementById('btn-qarz').className='tolov-btn';
+  document.getElementById('btn-vitrina').className='tolov-btn';
+  document.getElementById('qarz-warn').style.display='none';
+  document.getElementById('vitrina-info').style.display='none';
+  document.getElementById('tolov-required').textContent="To'lov turini tanlash shart!";
+  updateBasketTotal();
+  const sotSana = document.getElementById('sot-sana');
+  if(!sotSana.value) { sotSana.value = today(); updateSotSanaDisplay(); }
+}
+
+function sotuvSaqla() {
+  const mijoz=document.getElementById('sot-mijoz').value.trim();
+  if(!mijoz) { checkMijozField(); alert("Mijoz / do'kon nomini yozish shart!"); return; }
+  if(!currentTolov) { alert("To'lov turini tanlang: Naqd, Qarzga, yoki Do'konga (vitrina)!"); return; }
+  const sana=document.getElementById('sot-sana').value||today();
+  const time=nowTime();
+  const izoh=document.getElementById('sot-izoh').value.trim();
+  const tolov=currentTolov;
+  const sklad=load('sklad');
+  const items = [];
+  let invalid = false;
+  document.querySelectorAll('.basket-item').forEach(item=>{
+    const idx = item.id.replace('brow','');
+    const data = getBasketItemData(idx);
+    if(!data) return;
+    if(data.blok<=0) return;
+    if(!data.tashqi && data.sklatdaBlok < data.blok) { alert(`${data.nom} ${data.litr}L — skladda faqat ${data.sklatdaBlok} blok bor, ${data.blok} blok sota olmaysiz!`); invalid=true; return; }
+    items.push(data);
+  });
+  if(invalid) return;
+  if(!items.length){alert("Kamida bitta aroq tanlang!");return;}
+  items.forEach(it=>{ if(!it.tashqi) sklad[it.key].blok -= it.blok; });
+  const sotuvlar = load('sotuv');
+  const groupId = 'g'+Date.now()+Math.random().toString(36).slice(2);
+  sotuvlar.push({ groupId, sana, time, mijoz, izoh, tolov, qarzTolandi: tolov==='naqd', tolanganSana: tolov==='naqd'?sana:null, items });
+  save('sklad', sklad); save('sotuv', sotuvlar);
+  saveMijoz(mijoz);
+  resetBasketForm();
+  const msg = tolov==='qarz' ? "Qarzga sotuv saqlandi" : tolov==='vitrina' ? "Do'konga vitrina sifatida saqlandi" : "Sotuv saqlandi";
+  showToast('✅ ' + msg + ' (' + dateDisplay(sana) + ')');
+  renderSotuvlar();
+}
+
+function tolovBadge(t,tolandi) {
+  if(t==='naqd') return '<span class="badge badge-green">💵 Naqd</span>';
+  if(t==='vitrina') return '<span class="badge badge-blue">🏪 Do\'konga (vitrina)</span>';
+  return tolandi?'<span class="badge badge-blue">💳 Qarz (to\'landi)</span>':'<span class="badge badge-amber">💳 Qarz (ochiq)</span>';
+}
+
+function saleCardClass(s) {
+  if(s.tolov==='naqd') return 'gs-naqd';
+  if(s.tolov==='vitrina') return 'gs-vitrina';
+  if(s.tolov==='qarz') return s.qarzTolandi ? 'gs-qarz-paid' : 'gs-qarz-open';
+  return '';
+}
+
+function groupTotal(s) {
+  return (s.items||[]).reduce((t,it)=>{
+    if(!it.narx) return t;
+    if(it.tashqi) return t + it.blok*it.narx;
+    return t + it.dona*it.narx;
+  }, 0);
+}
+function groupBlok(s) { return (s.items||[]).reduce((t,it)=>t + it.blok, 0); }
+function groupDona(s) { return (s.items||[]).reduce((t,it)=>t + (it.dona||it.blok), 0); }
+
+function renderGroupedSale(s, opts) {
+  opts = opts || {};
+  const total = groupTotal(s);
+  const linesHtml = (s.items||[]).map(it=>{
+    const sum = it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
+    const dona = it.dona || it.blok;
+    return `<div class="grouped-line">
+      <span class="gl-name">${esc(it.nom)} ${it.litr}L</span>
+      <span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${dona} dona</span></span>
+      <span class="gl-sum">${it.narx?fmt(sum)+' so\'m':'—'}</span>
+    </div>`;
+  }).join('');
+  const izohHtml = s.izoh ? `<div class="grouped-izoh">📝 ${esc(s.izoh)}</div>` : '';
+  const payBtnHtml = (s.tolov==='qarz' && !s.qarzTolandi && opts.showPayBtn) ? `<button class="pay-btn" data-pay-group="${esc(s.groupId)}">✅ To'landi</button>` : '<span></span>';
+  return `<div class="grouped-sale ${saleCardClass(s)}" data-sale-group="${esc(s.groupId)}">
+    <div class="grouped-head"><span class="name">${esc(s.mijoz)}</span><span class="meta">${dateDisplay(s.sana)} ${s.time||''}</span></div>
+    ${linesHtml}
+    ${izohHtml}
+    <div class="grouped-total-row"><span>Jami: ${groupBlok(s)} blok / ${groupDona(s)} dona</span><span>${total?fmt(total)+' so\'m':'—'}</span></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px"><span>${tolovBadge(s.tolov, s.qarzTolandi)}</span>${payBtnHtml}</div>
+  </div>`;
+}
+
+function attachSaleCardHandlers(container) {
+  container.querySelectorAll('.grouped-sale').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('[data-pay-group]')) return;
+      const sotuvlar = load('sotuv');
+      const sale = sotuvlar.find(s=>s.groupId === card.dataset.saleGroup);
+      if(sale) showReceipt(sale);
+    });
+  });
+  container.querySelectorAll('[data-pay-group]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.stopPropagation(); qarzTola(btn.dataset.payGroup); });
+  });
+}
+
+function renderSotuvlar() {
+  const sotuvlar=load('sotuv');
+  const wrap=document.getElementById('sotuv-list');
+  const fa=(document.getElementById('filter-aroq-text').value||'').toLowerCase().trim();
+  const fm=(document.getElementById('filter-mijoz-text').value||'').toLowerCase().trim();
+  const ft=document.getElementById('filter-tolov').value;
+  const fs=document.getElementById('filter-sana').value;
+  let list=[...sotuvlar].reverse();
+  if(fa) list = list.filter(s=>(s.items||[]).some(it=>it.nom.toLowerCase().includes(fa)));
+  if(fm) list = list.filter(s=>(s.mijoz||'').toLowerCase().includes(fm));
+  if(ft) list = list.filter(s=>s.tolov===ft);
+  if(fs) list = list.filter(s=>s.sana===fs);
+  if(!list.length){wrap.innerHTML='<div class="empty">Sotuvlar yo\'q</div>';return;}
+  wrap.innerHTML = list.map(s=>renderGroupedSale(s, {showPayBtn:false})).join('');
+  attachSaleCardHandlers(wrap);
+}
+
+function renderQarzlar() {
+  const sotuvlar=load('sotuv');
+  const fm = (document.getElementById('filter-qarz-mijoz')?.value||'').toLowerCase().trim();
+  let qarzlar=sotuvlar.filter(s=>s.tolov==='qarz');
+  if(fm) qarzlar = qarzlar.filter(s=>(s.mijoz||'').toLowerCase().includes(fm));
+  const wrap=document.getElementById('qarz-list');
+  const metrics=document.getElementById('qarz-metrics');
+  const ochiq=qarzlar.filter(s=>!s.qarzTolandi);
+  const ochiqSum=ochiq.reduce((t,s)=>t+groupTotal(s),0);
+  const yopiq=qarzlar.filter(s=>s.qarzTolandi);
+  metrics.innerHTML=`<div class="metric m-amber"><div class="metric-label">Ochiq qarzlar</div><div class="metric-val">${ochiq.length}</div></div><div class="metric m-amber"><div class="metric-label">Ochiq summa</div><div class="metric-val">${fmt(ochiqSum)} so'm</div></div><div class="metric m-green"><div class="metric-label">To'langan</div><div class="metric-val">${yopiq.length}</div></div>`;
+  if(!qarzlar.length){wrap.innerHTML='<div class="empty">Qarz yo\'q</div>';return;}
+  wrap.innerHTML=[...qarzlar].reverse().map(s=>renderGroupedSale(s,{showPayBtn:true})).join('');
+  attachSaleCardHandlers(wrap);
+}
+
+function qarzTola(groupId) {
+  const sotuvlar=load('sotuv');
+  const idx = sotuvlar.findIndex(s=>s.groupId===groupId);
+  if(idx>=0) { sotuvlar[idx].qarzTolandi=true; sotuvlar[idx].tolanganSana = today(); }
+  save('sotuv',sotuvlar);
+  showToast("✅ Qarz to'landi deb belgilandi — naqd tushumga qo'shildi");
+  renderQarzlar();
+}
+
+function showReceipt(s) {
+  const total = groupTotal(s);
+  const blok = groupBlok(s);
+  const itemsHtml = (s.items||[]).map(it=>{
+    const sum = it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
+    return `<div class="receipt-item"><div class="iname">${esc(it.nom)} ${it.litr}L</div><div class="idetail"><span>${it.blok} blok × ${it.blokdona} = ${it.dona} dona</span><span>${it.narx?fmt(it.narx)+'/dona':'—'}</span></div><div class="idetail"><span></span><span><b>${it.narx?fmt(sum)+' so\'m':'—'}</b></span></div></div>`;
+  }).join('<div class="receipt-line"></div>');
+  const tolovText = s.tolov==='naqd' ? 'Naqd pul' : s.tolov==='vitrina' ? "Do'konga (vitrina)" : (s.qarzTolandi ? "Qarzga (to'landi)" : "Qarzga (ochiq)");
+  const izohHtml = s.izoh ? `<div class="receipt-row" style="margin-top:8px"><span style="font-style:italic; color:var(--text-secondary)">Izoh: ${esc(s.izoh)}</span></div>` : '';
+  const html = `<div class="receipt-overlay" id="receipt-overlay-bg"><div class="receipt-box"><div class="receipt-header"><div class="title">ALKO MARKET</div><div class="sub">Sotuv cheki</div></div><div class="receipt-row"><span>Mijoz:</span><span><b>${esc(s.mijoz)}</b></span></div><div class="receipt-row"><span>Sana:</span><span>${dateDisplay(s.sana)} ${s.time||''}</span></div><div class="receipt-row"><span>To'lov:</span><span>${tolovText}</span></div><div class="receipt-line"></div>${itemsHtml}<div class="receipt-total"><span>JAMI (${blok} blok):</span><span>${total?fmt(total)+" so'm":'—'}</span></div>${izohHtml}<button class="primary receipt-close" id="receipt-close-btn">Yopish</button></div></div>`;
+  document.getElementById('receipt-modal').innerHTML = html;
+  document.getElementById('receipt-overlay-bg').addEventListener('click', (e)=>{ if(e.target.id === 'receipt-overlay-bg') closeReceipt(); });
+  document.getElementById('receipt-close-btn').addEventListener('click', closeReceipt);
+}
+function closeReceipt() { document.getElementById('receipt-modal').innerHTML = ''; }
+
+/* ============ KIRIM HISOBOT ============ */
+
+function renderKirimHisobot() {
+  const kirimlar = load('kirim');
+  const dan=document.getElementById('kh-dan').value;
+  const gacha=document.getElementById('kh-gacha').value;
+  let list=[...kirimlar];
+  if(dan) list=list.filter(k=>k.sana>=dan);
+  if(gacha) list=list.filter(k=>k.sana<=gacha);
+  list = list.reverse();
+  const totalBlok = list.reduce((t,k)=>t+(k.blok||0),0);
+  const totalDona = list.reduce((t,k)=>t+(k.blok||0)*(k.blokdona||1),0);
+  document.getElementById('kh-metrics').innerHTML=`<div class="metric"><div class="metric-label">Kirim yozuvlari</div><div class="metric-val">${list.length}</div></div><div class="metric m-blue"><div class="metric-label">Jami kirim bloklar</div><div class="metric-val">${totalBlok}</div></div><div class="metric m-blue"><div class="metric-label">Jami kirim donalar</div><div class="metric-val">${totalDona}</div></div>`;
+  const tbody = document.getElementById('kh-tbody');
+  if(!list.length) { tbody.innerHTML='<tr><td colspan="7" class="empty">Kirim tarixi yo\'q</td></tr>'; return; }
+  tbody.innerHTML = list.map(k=>`<tr><td>${dateDisplay(k.sana)}</td><td>${k.time||'—'}</td><td>${esc(k.nom)}</td><td>${k.litr}L</td><td><span class="qty-pill blok">${k.blok} blok</span></td><td><span class="qty-pill dona">${k.blok*(k.blokdona||1)} dona</span></td><td>${k.narx?fmt(k.narx)+' so\'m':'—'}</td></tr>`).join('');
+}
+
+/* ============ SOTUV HISOBOT ============ */
+
+function renderHisobot() {
+  const sotuvlar=load('sotuv');
+  const dan=document.getElementById('hisob-dan').value;
+  const gacha=document.getElementById('hisob-gacha').value;
+  const fm=(document.getElementById('hisob-mijoz').value||'').toLowerCase().trim();
+  let list=[...sotuvlar];
+  if(dan) list=list.filter(s=>s.sana>=dan);
+  if(gacha) list=list.filter(s=>s.sana<=gacha);
+  if(fm) list=list.filter(s=>(s.mijoz||'').toLowerCase().includes(fm));
+  list=list.reverse();
+  const naqdDirect = list.filter(s=>s.tolov==='naqd');
+  const qarzPaid = list.filter(s=>s.tolov==='qarz'&&s.qarzTolandi);
+  const qarzOpen = list.filter(s=>s.tolov==='qarz'&&!s.qarzTolandi);
+  const vitrina=list.filter(s=>s.tolov==='vitrina');
+  const naqdDirectSum = naqdDirect.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzPaidSum = qarzPaid.reduce((t,s)=>t+groupTotal(s),0);
+  const totalRealizedIncome = naqdDirectSum + qarzPaidSum;
+  const qarzOpenSum = qarzOpen.reduce((t,s)=>t+groupTotal(s),0);
+  const vitrinaBlok=vitrina.reduce((t,s)=>t+groupBlok(s),0);
+  const totalBlok=list.reduce((t,s)=>t+groupBlok(s),0);
+  document.getElementById('hisob-metrics').innerHTML=`
+    <div class="metric"><div class="metric-label">Jami sotuvlar</div><div class="metric-val">${list.length}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami bloklar</div><div class="metric-val">${totalBlok}</div></div>
+    <div class="metric m-green"><div class="metric-label">Jami tushum (naqd + to'langan qarz)</div><div class="metric-val">${fmt(totalRealizedIncome)} so'm</div><div class="metric-sub">Naqddan: ${fmt(naqdDirectSum)} so'm · Qarzdan tushgan: ${fmt(qarzPaidSum)} so'm</div></div>
+    <div class="metric m-amber"><div class="metric-label">Ochiq qarz (hali to'lanmagan)</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
+    <div class="metric"><div class="metric-label">Vitrinaga berilgan blok</div><div class="metric-val">${vitrinaBlok}</div></div>
+  `;
+  const wrap=document.getElementById('hisob-list');
+  if(!list.length){wrap.innerHTML='<div class="empty">Ma\'lumot yo\'q</div>';return;}
+  wrap.innerHTML = list.map(s=>renderGroupedSale(s,{showPayBtn:false})).join('');
+  attachSaleCardHandlers(wrap);
+}
+
+/* ============ UMUMIY HISOBOT ============ */
+
+function renderUmumiyHisobot() {
+  const sotuvlar = load('sotuv');
+  const kirimlar = load('kirim');
+
+  if(!sotuvlar.length && !kirimlar.length) {
+    document.getElementById('umumiy-metrics').innerHTML = '<div class="empty">Hali hech qanday kirim yoki sotuv kiritilmagan</div>';
+    document.getElementById('umumiy-top-tbody').innerHTML = '<tr><td colspan="5" class="empty">Ma\'lumot yo\'q</td></tr>';
+    document.getElementById('umumiy-mijoz-tbody').innerHTML = '<tr><td colspan="5" class="empty">Ma\'lumot yo\'q</td></tr>';
+    return;
+  }
+
+  // Boshlangan sana - eng birinchi yozuv sanasi (kirim yoki sotuv)
+  const allDates = [...sotuvlar.map(s=>s.sana), ...kirimlar.map(k=>k.sana)].filter(Boolean).sort();
+  const boshlanganSana = allDates.length ? allDates[0] : today();
+
+  const naqdDirect = sotuvlar.filter(s=>s.tolov==='naqd');
+  const qarzPaid = sotuvlar.filter(s=>s.tolov==='qarz'&&s.qarzTolandi);
+  const qarzOpen = sotuvlar.filter(s=>s.tolov==='qarz'&&!s.qarzTolandi);
+  const vitrina = sotuvlar.filter(s=>s.tolov==='vitrina');
+
+  const naqdSum = naqdDirect.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzPaidSum = qarzPaid.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzOpenSum = qarzOpen.reduce((t,s)=>t+groupTotal(s),0);
+  const totalIncome = naqdSum + qarzPaidSum;
+  const totalSotuvBlok = sotuvlar.reduce((t,s)=>t+groupBlok(s),0);
+  const totalKirimBlok = kirimlar.reduce((t,k)=>t+(k.blok||0),0);
+  const vitrinaBlok = vitrina.reduce((t,s)=>t+groupBlok(s),0);
+  const uniqueMijozlar = new Set(sotuvlar.map(s=>s.mijoz)).size;
+
+  document.getElementById('umumiy-metrics').innerHTML = `
+    <div class="metric"><div class="metric-label">Ish boshlangan sana</div><div class="metric-val" style="font-size:16px">${dateDisplay(boshlanganSana)}</div></div>
+    <div class="metric"><div class="metric-label">Jami sotuvlar soni</div><div class="metric-val">${sotuvlar.length}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami sotilgan blok</div><div class="metric-val">${totalSotuvBlok}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami kirim qilingan blok</div><div class="metric-val">${totalKirimBlok}</div></div>
+    <div class="metric m-green"><div class="metric-label">Jami tushum (naqd + to'langan qarz)</div><div class="metric-val">${fmt(totalIncome)} so'm</div><div class="metric-sub">Naqddan: ${fmt(naqdSum)} so'm · Qarzdan: ${fmt(qarzPaidSum)} so'm</div></div>
+    <div class="metric m-amber"><div class="metric-label">Hali to'lanmagan jami qarz</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
+    <div class="metric"><div class="metric-label">Vitrinaga berilgan jami blok</div><div class="metric-val">${vitrinaBlok}</div></div>
+    <div class="metric"><div class="metric-label">Jami mijozlar soni</div><div class="metric-val">${uniqueMijozlar}</div></div>
+  `;
+
+  // TOP aroqlar
+  const aroqStats = {};
+  sotuvlar.forEach(s=>{
+    (s.items||[]).forEach(it=>{
+      const k = it.nom + ' ' + it.litr + 'L';
+      if(!aroqStats[k]) aroqStats[k] = {blok:0, dona:0, summa:0};
+      aroqStats[k].blok += it.blok;
+      aroqStats[k].dona += (it.dona||it.blok);
+      aroqStats[k].summa += it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
+    });
+  });
+  const topAroqlar = Object.entries(aroqStats).sort((a,b)=>b[1].blok-a[1].blok).slice(0,10);
+  const topTbody = document.getElementById('umumiy-top-tbody');
+  if(!topAroqlar.length) topTbody.innerHTML = '<tr><td colspan="5" class="empty">Hali sotuv yo\'q</td></tr>';
+  else topTbody.innerHTML = topAroqlar.map(([nom,st],i)=>`<tr><td class="num-cell">${i+1}</td><td>${esc(nom)}</td><td><span class="qty-pill blok">${st.blok} blok</span></td><td><span class="qty-pill dona">${st.dona} dona</span></td><td>${st.summa?fmt(st.summa)+' so\'m':'—'}</td></tr>`).join('');
+
+  // TOP mijozlar
+  const mijozStats = {};
+  sotuvlar.forEach(s=>{
+    const m = s.mijoz || 'Noma\'lum';
+    if(!mijozStats[m]) mijozStats[m] = {count:0, blok:0, summa:0};
+    mijozStats[m].count += 1;
+    mijozStats[m].blok += groupBlok(s);
+    mijozStats[m].summa += groupTotal(s);
+  });
+  const topMijozlar = Object.entries(mijozStats).sort((a,b)=>b[1].summa-a[1].summa).slice(0,10);
+  const mijozTbody = document.getElementById('umumiy-mijoz-tbody');
+  if(!topMijozlar.length) mijozTbody.innerHTML = '<tr><td colspan="5" class="empty">Hali mijoz yo\'q</td></tr>';
+  else mijozTbody.innerHTML = topMijozlar.map(([nom,st],i)=>`<tr><td class="num-cell">${i+1}</td><td>${esc(nom)}</td><td>${st.count}</td><td><span class="qty-pill blok">${st.blok} blok</span></td><td>${st.summa?fmt(st.summa)+' so\'m':'—'}</td></tr>`).join('');
+}
+
+(async function init() {
+  const ok = await loadAllFromBackend();
+  if(ok) {
+    await bootstrapCatalogIfEmpty();
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('app-root').style.display = 'block';
+    renderSklad();
+    addBasketRow();
+    addMavjudRow();
+  } else {
+    document.getElementById('loading-screen').innerHTML = '⚠️ Backendga ulanib bo\'lmadi. Internetni tekshirib, sahifani qaytadan yuklang.';
+  }
+})();
+</script>
+</body>
+</html>
