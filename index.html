@@ -244,6 +244,7 @@ details.drop[open] > summary .drop-chevron { transform: rotate(90deg); }
 .confirm-msg b { color: var(--text-primary); }
 .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .confirm-actions button { flex: 0 0 auto; }
+.tashqi-badge { display: inline-block; background: #fdf3e0; color: #b06000; font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 100px; margin-left: 6px; vertical-align: middle; white-space: nowrap; }
 
 /* ============ DARK MODE (tungi rejim) ============ */
 html[data-theme="dark"] {
@@ -294,6 +295,7 @@ html[data-theme="dark"] .receipt-overlay { background: rgba(0,0,0,0.7); }
 html[data-theme="dark"] .toast { background: #2e7d46; }
 html[data-theme="dark"] .combo-dropdown { box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
 html[data-theme="dark"] .receipt-box2 { box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+html[data-theme="dark"] .tashqi-badge { background: #352a12; color: #f0b54e; }
 </style>
 </head>
 <body>
@@ -466,6 +468,8 @@ html[data-theme="dark"] .receipt-box2 { box-shadow: 0 10px 40px rgba(0,0,0,0.6);
   </div>
   <div class="section-title" style="font-size:15px; margin:1.4rem 0 0.7rem;">Eng ko'p xarid qilgan mijozlar <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(mijoz ustiga bosib, oldan tovarlarini ko'ring)</span></div>
   <div id="umumiy-mijoz-list"></div>
+  <div class="section-title" style="font-size:15px; margin:1.6rem 0 0.7rem;">🏪 Tashqi skladdan olib sotilgan tovarlar <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(bizning skladda yo'q, boshqa joydan olingan — bosib ko'ring)</span></div>
+  <div id="umumiy-tashqi-list"></div>
 </div>
 
 </div>
@@ -626,6 +630,8 @@ function itemDona(it) { return it.dona || (it.blok * (it.blokdona || 1)); }
 /* Bitta sotuv qatorining summasi — narx HAR DOIM bitta donaga, shuning uchun donalar soniga ko'paytiriladi
    (tashqi/skladda bor — farqi yo'q). Bu avvalgi "blok × narx" xatosini to'g'irlaydi. */
 function itemSum(it) { return it.narx ? itemDona(it) * it.narx : 0; }
+/* Tashqi skladdan (boshqa do'kondan) olingan tovar uchun belgi */
+function tashqiTag(it) { return it.tashqi ? ' <span class="tashqi-badge">🏪 tashqi skladdan</span>' : ''; }
 function aroqKey(nom, litr) { return nom.trim() + '__' + litr; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function dateDisplay(isoDate) {
@@ -1212,7 +1218,7 @@ function renderGroupedSale(s, opts) {
     const sum = itemSum(it);
     const d = itemDona(it);
     return `<div class="gs-line">
-      <span class="gl-name">${esc(it.nom)} ${it.litr}L</span>
+      <span class="gl-name">${esc(it.nom)} ${it.litr}L${tashqiTag(it)}</span>
       <span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${d} dona</span></span>
       <span class="gl-sum">${it.narx?fmt(sum)+" so'm":'—'}</span>
     </div>`;
@@ -1466,6 +1472,7 @@ function renderUmumiyHisobot() {
     document.getElementById('umumiy-metrics').innerHTML = '<div class="empty">Hali hech qanday kirim yoki sotuv kiritilmagan</div>';
     document.getElementById('umumiy-top-tbody').innerHTML = '<tr><td colspan="5" class="empty">Ma\'lumot yo\'q</td></tr>';
     document.getElementById('umumiy-mijoz-list').innerHTML = '<div class="empty">Ma\'lumot yo\'q</div>';
+    document.getElementById('umumiy-tashqi-list').innerHTML = '<div class="empty">Ma\'lumot yo\'q</div>';
     return;
   }
 
@@ -1482,21 +1489,58 @@ function renderUmumiyHisobot() {
   const qarzPaidSum = qarzPaid.reduce((t,s)=>t+groupTotal(s),0);
   const qarzOpenSum = qarzOpen.reduce((t,s)=>t+groupTotal(s),0);
   const totalIncome = naqdSum + qarzPaidSum;
-  const totalSotuvBlok = sotuvlar.reduce((t,s)=>t+groupBlok(s),0);
+  const sotilganBlok = sotuvlar.filter(s=>s.tolov!=='vitrina').reduce((t,s)=>t+groupBlok(s),0);
   const totalKirimBlok = kirimlar.reduce((t,k)=>t+(k.blok||0),0);
   const vitrinaBlok = vitrina.reduce((t,s)=>t+groupBlok(s),0);
   const uniqueMijozlar = new Set(sotuvlar.map(s=>s.mijoz)).size;
+  // Tashqi skladdan (bizning skladda yo'q) olingan tovarlar statistikasi
+  let tashqiBlok=0, tashqiDona=0, tashqiSumma=0;
+  const tashqiStats = {};
+  sotuvlar.forEach(s=>{
+    (s.items||[]).forEach(it=>{
+      if(!it.tashqi) return;
+      tashqiBlok += it.blok; tashqiDona += itemDona(it); tashqiSumma += itemSum(it);
+      const k = it.nom+' '+it.litr+'L';
+      if(!tashqiStats[k]) tashqiStats[k] = {blok:0, dona:0, summa:0, sold:0, vit:0, count:0};
+      const st = tashqiStats[k];
+      st.blok += it.blok; st.dona += itemDona(it); st.summa += itemSum(it); st.count += 1;
+      if(s.tolov==='vitrina') st.vit += it.blok; else st.sold += it.blok;
+    });
+  });
+  const tashqiArr = Object.entries(tashqiStats).sort((a,b)=>b[1].blok-a[1].blok);
 
   document.getElementById('umumiy-metrics').innerHTML = `
     <div class="metric m-slate"><div class="metric-label">Ish boshlangan sana</div><div class="metric-val" style="font-size:17px">${dateDisplay(boshlanganSana)}</div></div>
     <div class="metric m-blue"><div class="metric-label">Jami sotuvlar soni</div><div class="metric-val">${sotuvlar.length}</div></div>
-    <div class="metric m-purple"><div class="metric-label">Jami sotilgan blok</div><div class="metric-val">${totalSotuvBlok}</div></div>
+    <div class="metric m-purple"><div class="metric-label">Jami sotilgan blok (vitrinasiz)</div><div class="metric-val">${sotilganBlok}</div><div class="metric-sub">faqat naqd va qarz</div></div>
+    <div class="metric m-pink"><div class="metric-label">Vitrinaga berilgan blok</div><div class="metric-val">${vitrinaBlok}</div></div>
     <div class="metric m-teal"><div class="metric-label">Jami kirim qilingan blok</div><div class="metric-val">${totalKirimBlok}</div></div>
+    <div class="metric m-amber"><div class="metric-label">🏪 Tashqi skladdan olingan</div><div class="metric-val">${tashqiBlok} blok</div><div class="metric-sub">${tashqiDona} dona${tashqiSumma?" · "+fmt(tashqiSumma)+" so'm":''}</div></div>
     <div class="metric m-green"><div class="metric-label">Jami tushum (naqd + to'langan qarz)</div><div class="metric-val">${fmt(totalIncome)} so'm</div><div class="metric-sub">Naqddan: ${fmt(naqdSum)} so'm · Qarzdan: ${fmt(qarzPaidSum)} so'm</div></div>
     <div class="metric m-red"><div class="metric-label">Hali to'lanmagan jami qarz</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
-    <div class="metric m-pink"><div class="metric-label">Vitrinaga berilgan jami blok</div><div class="metric-val">${vitrinaBlok}</div></div>
-    <div class="metric m-amber"><div class="metric-label">Jami mijozlar soni</div><div class="metric-val">${uniqueMijozlar}</div></div>
+    <div class="metric m-slate"><div class="metric-label">Jami mijozlar soni</div><div class="metric-val">${uniqueMijozlar}</div></div>
   `;
+
+  // Tashqi skladdan olingan tovarlar ro'yxati (dropdown)
+  const tashqiWrap = document.getElementById('umumiy-tashqi-list');
+  if(!tashqiArr.length) {
+    tashqiWrap.innerHTML = '<div class="empty">Hali tashqi skladdan (skladda yo\'q) olib sotilgan tovar yo\'q.</div>';
+  } else {
+    const tRows = tashqiArr.map(([nom,st])=>`<tr>
+      <td>${esc(nom)}</td>
+      <td><span class="qty-pill blok">${st.blok} blok</span></td>
+      <td><span class="qty-pill dona">${st.dona} dona</span></td>
+      <td>${st.sold} sotilgan${st.vit?' / '+st.vit+' vitrina':''}</td>
+      <td>${st.summa?fmt(st.summa)+" so'm":'—'}</td>
+    </tr>`).join('');
+    tashqiWrap.innerHTML = `<div class="cust-card" style="border-left-color:#f9ab00"><details class="drop"><summary>
+        <span class="drop-title"><span class="drop-chevron">▶</span>🏪 Jami tashqi tovarlar</span>
+        <span class="drop-meta"><span class="qty-pill blok">${tashqiBlok} blok</span><span class="qty-pill dona">${tashqiDona} dona</span><span>${tashqiArr.length} xil${tashqiSumma?' · '+fmt(tashqiSumma)+" so'm":''}</span></span>
+      </summary><div class="drop-body"><div class="table-wrap"><table>
+        <thead><tr><th>Aroq</th><th>Jami blok</th><th>Jami dona</th><th>Sotilgan / Vitrina</th><th>Summa</th></tr></thead>
+        <tbody>${tRows}</tbody>
+      </table></div></div></details></div>`;
+  }
 
   // TOP aroqlar
   const aroqStats = {};
@@ -1534,7 +1578,7 @@ function renderUmumiyHisobot() {
   function miniSalesHtml(arr){
     if(!arr.length) return '<div class="empty" style="padding:0.8rem">Yo\'q</div>';
     return [...arr].sort((a,b)=>(b.sana+(b.time||'')).localeCompare(a.sana+(a.time||''))).map(s=>{
-      const lines = (s.items||[]).map(it=>`<div class="mini-line"><span class="ml-name">${esc(it.nom)} ${it.litr}L</span><span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${itemDona(it)} dona</span></span><span class="gl-sum">${it.narx?fmt(itemSum(it))+" so'm":'—'}</span></div>`).join('');
+      const lines = (s.items||[]).map(it=>`<div class="mini-line"><span class="ml-name">${esc(it.nom)} ${it.litr}L${tashqiTag(it)}</span><span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${itemDona(it)} dona</span></span><span class="gl-sum">${it.narx?fmt(itemSum(it))+" so'm":'—'}</span></div>`).join('');
       const st = groupTotal(s);
       return `<div class="mini-sale"><div class="mini-sale-head"><span>${dateDisplay(s.sana)} ${s.time||''} ${tolovBadge(s.tolov, s.qarzTolandi)}</span><span>${st?fmt(st)+" so'm":'—'}</span></div>${lines}</div>`;
     }).join('');
