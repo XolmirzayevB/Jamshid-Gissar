@@ -238,6 +238,9 @@ details.drop[open] > summary .drop-chevron { transform: rotate(90deg); }
 .rc-total .rt-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
 .rc-izoh { font-size: 12px; color: var(--text-secondary); font-style: italic; margin-top: 12px; background: var(--bg-secondary); padding: 8px 12px; border-radius: var(--radius-md); }
 .rc-close { margin-top: 1.2rem; }
+.rc-actions { display: flex; gap: 10px; margin-top: 1.2rem; }
+.rc-actions .rc-close { margin-top: 0; flex: 1; }
+.rc-actions .chek-btn { flex: 1; }
 .confirm-box { background: var(--bg-primary); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 380px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
 .confirm-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
 .confirm-msg { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.3rem; line-height: 1.55; }
@@ -1227,19 +1230,77 @@ function groupTotal(s) {
 function groupBlok(s) { return (s.items||[]).reduce((t,it)=>t + it.blok, 0); }
 function groupDona(s) { return (s.items||[]).reduce((t,it)=>t + itemDona(it), 0); }
 
+// Bir xil aroqning o'z + tashqi qismlarini bitta qatorga birlashtiradi (ko'rsatish uchun)
+function mergeItems(items) {
+  const map = {}; const order = [];
+  (items||[]).forEach(it=>{
+    const key = it.nom+'|'+it.litr+'|'+(it.narx||0);
+    if(!map[key]) { map[key] = { nom:it.nom, litr:it.litr, narx:it.narx||0, blok:0, dona:0, sum:0, tashqiBlok:0 }; order.push(key); }
+    const m = map[key];
+    m.blok += it.blok; m.dona += itemDona(it); m.sum += itemSum(it);
+    if(it.tashqi) m.tashqiBlok += it.blok;
+  });
+  return order.map(k=>map[k]);
+}
+// Birlashtirilgan qatorda tashqi qism bo'lsa kichik belgi (hisobotlarda)
+function tashqiNote(m) {
+  if(!m.tashqiBlok) return '';
+  if(m.tashqiBlok >= m.blok) return ' <span class="tashqi-badge">🏪 tashqi skladdan</span>';
+  return ` <span class="tashqi-badge">🏪 ${m.tashqiBlok} blok tashqi</span>`;
+}
+
+// Chek matni (nusxa olish uchun) — birlashtirilgan, o'z/tashqi farqisiz
+function buildReceiptText(s) {
+  const merged = mergeItems(s.items);
+  const tolovText = s.tolov==='naqd' ? 'Naqd pul' : s.tolov==='vitrina' ? "Do'konga (vitrina)" : (s.qarzTolandi ? "Qarz (to'langan)" : "Qarz (ochiq)");
+  const L = [];
+  L.push("🍷 ALKO MARKET — Sotuv cheki");
+  L.push("Mijoz: " + s.mijoz);
+  L.push("Sana: " + dateDisplay(s.sana) + " " + (s.time||''));
+  L.push("To'lov: " + tolovText);
+  L.push("----------------------------");
+  merged.forEach(m=>{
+    L.push(`${m.nom} ${m.litr}L`);
+    if(m.narx) L.push(`  ${m.blok} blok / ${m.dona} dona x ${fmt(m.narx)} = ${fmt(m.sum)} so'm`);
+    else L.push(`  ${m.blok} blok / ${m.dona} dona (narxsiz)`);
+  });
+  L.push("----------------------------");
+  L.push(`JAMI: ${groupBlok(s)} blok / ${groupDona(s)} dona = ${fmt(groupTotal(s))} so'm`);
+  if(s.izoh) L.push("Izoh: " + s.izoh);
+  return L.join("\n");
+}
+let receiptSale = null;
+function copyReceipt() {
+  if(!receiptSale) return;
+  const text = buildReceiptText(receiptSale);
+  const done = ()=>showToast('📋 Chek nusxa olindi');
+  try {
+    if(navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, ()=>fallbackCopy(text, done));
+    } else fallbackCopy(text, done);
+  } catch(e) { fallbackCopy(text, done); }
+}
+function fallbackCopy(text, done) {
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.focus(); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta); done();
+  } catch(e) { showToast("Nusxa olishda xato — chekni qo'lda belgilang"); }
+}
+
 function renderGroupedSale(s, opts) {
   opts = opts || {};
   const total = groupTotal(s);
   const blok = groupBlok(s);
   const dona = groupDona(s);
-  const itemCount = (s.items||[]).length;
-  const linesHtml = (s.items||[]).map(it=>{
-    const sum = itemSum(it);
-    const d = itemDona(it);
+  const merged = mergeItems(s.items);
+  const itemCount = merged.length;
+  const linesHtml = merged.map(m=>{
     return `<div class="gs-line">
-      <span class="gl-name">${esc(it.nom)} ${it.litr}L${tashqiTag(it)}</span>
-      <span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${d} dona</span></span>
-      <span class="gl-sum">${it.narx?fmt(sum)+" so'm":'—'}</span>
+      <span class="gl-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</span>
+      <span class="gl-qty"><span class="qty-pill blok">${m.blok} blok</span><span class="qty-pill dona">${m.dona} dona</span></span>
+      <span class="gl-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</span>
     </div>`;
   }).join('');
   const izohHtml = s.izoh ? `<div class="grouped-izoh">📝 ${esc(s.izoh)}</div>` : '';
@@ -1317,18 +1378,17 @@ function qarzTola(groupId) {
 }
 
 function showReceipt(s) {
+  receiptSale = s;
   const total = groupTotal(s);
   const blok = groupBlok(s);
   const dona = groupDona(s);
   const payClass = s.tolov==='naqd' ? 't-naqd' : s.tolov==='vitrina' ? 't-vitrina' : (s.qarzTolandi ? 't-qarz-paid' : 't-qarz-open');
   const tolovText = s.tolov==='naqd' ? '💵 Naqd pul' : s.tolov==='vitrina' ? "🏪 Do'konga (vitrina)" : (s.qarzTolandi ? "💳 Qarzga (to'landi)" : "💳 Qarzga (ochiq)");
-  const itemsHtml = (s.items||[]).map(it=>{
-    const sum = itemSum(it);
-    const d = itemDona(it);
+  const itemsHtml = mergeItems(s.items).map(m=>{
     return `<div class="rc-item">
-      <div class="ri-name">${esc(it.nom)} ${it.litr}L</div>
-      <div class="rc-pills"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${d} dona</span></div>
-      <div class="ri-row"><span>${it.narx?fmt(it.narx)+" so'm / dona":'narxsiz'}</span><span class="ri-sum">${it.narx?fmt(sum)+" so'm":'—'}</span></div>
+      <div class="ri-name">${esc(m.nom)} ${m.litr}L</div>
+      <div class="rc-pills"><span class="qty-pill blok">${m.blok} blok</span><span class="qty-pill dona">${m.dona} dona</span></div>
+      <div class="ri-row"><span>${m.narx?fmt(m.narx)+" so'm / dona":'narxsiz'}</span><span class="ri-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</span></div>
     </div>`;
   }).join('');
   const izohHtml = s.izoh ? `<div class="rc-izoh">📝 ${esc(s.izoh)}</div>` : '';
@@ -1346,12 +1406,16 @@ function showReceipt(s) {
       <div class="rc-divider"></div>
       <div class="rc-total"><span class="rt-lbl">JAMI · ${blok} blok / ${dona} dona</span><span class="rt-val">${total?fmt(total)+" so'm":'—'}</span></div>
       ${izohHtml}
-      <button class="primary rc-close" id="receipt-close-btn">Yopish</button>
+      <div class="rc-actions">
+        <button class="chek-btn" id="receipt-copy-btn">📋 Nusxa olish</button>
+        <button class="primary rc-close" id="receipt-close-btn">Yopish</button>
+      </div>
     </div>
   </div></div>`;
   document.getElementById('receipt-modal').innerHTML = html;
   document.getElementById('receipt-overlay-bg').addEventListener('click', (e)=>{ if(e.target.id === 'receipt-overlay-bg') closeReceipt(); });
   document.getElementById('receipt-close-btn').addEventListener('click', closeReceipt);
+  document.getElementById('receipt-copy-btn').addEventListener('click', copyReceipt);
 }
 function closeReceipt() { document.getElementById('receipt-modal').innerHTML = ''; }
 
@@ -1609,7 +1673,7 @@ function renderUmumiyHisobot() {
   function miniSalesHtml(arr){
     if(!arr.length) return '<div class="empty" style="padding:0.8rem">Yo\'q</div>';
     return [...arr].sort((a,b)=>(b.sana+(b.time||'')).localeCompare(a.sana+(a.time||''))).map(s=>{
-      const lines = (s.items||[]).map(it=>`<div class="mini-line"><span class="ml-name">${esc(it.nom)} ${it.litr}L${tashqiTag(it)}</span><span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${itemDona(it)} dona</span></span><span class="gl-sum">${it.narx?fmt(itemSum(it))+" so'm":'—'}</span></div>`).join('');
+      const lines = mergeItems(s.items).map(m=>`<div class="mini-line"><span class="ml-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</span><span class="gl-qty"><span class="qty-pill blok">${m.blok} blok</span><span class="qty-pill dona">${m.dona} dona</span></span><span class="gl-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</span></div>`).join('');
       const st = groupTotal(s);
       return `<div class="mini-sale"><div class="mini-sale-head"><span>${dateDisplay(s.sana)} ${s.time||''} ${tolovBadge(s.tolov, s.qarzTolandi)}</span><span>${st?fmt(st)+" so'm":'—'}</span></div>${lines}</div>`;
     }).join('');
