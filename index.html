@@ -1053,21 +1053,33 @@ function addBasketRow() {
   const i = basketRowCount++;
   const div = document.createElement('div');
   div.className='basket-item'; div.id='brow'+i;
-  div.innerHTML = `<div class="basket-item-row"><div id="brow${i}-comboholder" style="flex:2; min-width:180px"></div><div style="flex:1; min-width:70px"><label>Blok</label><input type="number" min="1" value="1" id="brow${i}-blok" oninput="updateBasketCalc(${i})"></div><div style="flex:1; min-width:90px"><label>1 dona narx</label><input type="number" placeholder="0" id="brow${i}-narx" oninput="updateBasketCalc(${i})"></div><button class="remove-btn" onclick="document.getElementById('brow${i}').remove(); updateBasketTotal()">✕</button></div><div class="basket-calc" id="brow${i}-calc"></div>`;
+  div.innerHTML = `<div class="basket-item-row">
+    <div id="brow${i}-comboholder" style="flex:2; min-width:170px"></div>
+    <div style="flex:1; min-width:95px"><label>O'z skladdan</label><input type="number" min="0" value="1" id="brow${i}-own" oninput="updateBasketCalc(${i})"></div>
+    <div style="flex:1; min-width:105px"><label>Boshqa skladdan</label><input type="number" min="0" value="0" id="brow${i}-tashqi" oninput="updateBasketCalc(${i})"></div>
+    <div style="flex:1; min-width:90px"><label>1 dona narx</label><input type="number" placeholder="0" id="brow${i}-narx" oninput="updateBasketCalc(${i})"></div>
+    <button class="remove-btn" onclick="document.getElementById('brow${i}').remove(); updateBasketTotal()">✕</button>
+  </div><div class="basket-calc" id="brow${i}-calc"></div>`;
   document.getElementById('basket-list').appendChild(div);
   buildCombo('brow'+i+'-comboholder', 'brow'+i, '🔍 qidirish va tanlash (skladda bor yoki yo\'q, hammasi)', ()=>onBasketAroqSelected(i), false);
 }
 
 function onBasketAroqSelected(i) {
-  // Aroq tanlanganida blok inputini har doim 1 ga tushiramiz, eski qiymat
-  // qolib ketishining oldini olish uchun (foydalanuvchi keyin o'zi o'zgartirishi mumkin).
-  const blokInput = document.getElementById('brow'+i+'-blok');
-  if(blokInput) blokInput.value = 1;
+  // Aroq tanlanganda: skladda bor bo'lsa 1 ta o'z skladdan, yo'q bo'lsa 1 ta boshqa skladdan
+  const sklad = load('sklad');
+  const key = document.getElementById('brow'+i+'-value')?.value;
+  const item = key ? sklad[key] : null;
+  const stock = item ? (item.blok||0) : 0;
+  const ownInput = document.getElementById('brow'+i+'-own');
+  const tashqiInput = document.getElementById('brow'+i+'-tashqi');
+  if(stock>0) { if(ownInput) ownInput.value = 1; if(tashqiInput) tashqiInput.value = 0; }
+  else        { if(ownInput) ownInput.value = 0; if(tashqiInput) tashqiInput.value = 1; }
   updateBasketCalc(i);
 }
 
 function getBasketItemData(idx) {
-  const blok = parseInt(document.getElementById('brow'+idx+'-blok')?.value)||0;
+  const ownBlok = Math.max(0, parseInt(document.getElementById('brow'+idx+'-own')?.value)||0);
+  const tashqiBlok = Math.max(0, parseInt(document.getElementById('brow'+idx+'-tashqi')?.value)||0);
   const narxInput = document.getElementById('brow'+idx+'-narx');
   const narx = narxInput && !narxInput.disabled ? (parseInt(narxInput.value)||0) : 0;
   const sklad = load('sklad');
@@ -1076,9 +1088,10 @@ function getBasketItemData(idx) {
   const item = sklad[key];
   if(!item) return null;
   const blokdona = item.blokdona||1;
-  const inStock = (item.blok||0) > 0;
-  const tashqi = !inStock;
-  return { tashqi, key, nom: item.nom, litr: item.litr, blokdona, blok, dona: blok*blokdona, narx, inStock, sklatdaBlok: item.blok||0 };
+  const sklatdaBlok = item.blok||0;
+  const totalBlok = ownBlok + tashqiBlok;
+  const totalDona = totalBlok * blokdona;
+  return { key, nom: item.nom, litr: item.litr, blokdona, narx, ownBlok, tashqiBlok, totalBlok, totalDona, sklatdaBlok };
 }
 
 let currentTolov = '';
@@ -1089,21 +1102,23 @@ function updateBasketCalc(idx) {
   if(!calc) return;
   if(!data) { calc.textContent=''; calc.classList.remove('error','warn-tashqi'); updateBasketTotal(); return; }
   calc.classList.remove('error','warn-tashqi');
-  if(data.tashqi) {
-    calc.classList.add('warn-tashqi');
-    let line = `ℹ️ "${esc(data.nom)} ${data.litr}L" bizning skladda yo'q (0 blok) — boshqa joydan olib sotilayotgan deb hisoblanadi, bizning skladdan ayirilmaydi.`;
-    if(data.narx>0) line += ` ${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona × ${fmt(data.narx)} so'm = <b>${fmt(data.dona*data.narx)} so'm</b>`;
-    calc.innerHTML = line;
+  const sum = data.narx ? data.totalDona*data.narx : 0;
+  let moneyPhrase;
+  if(data.narx>0) moneyPhrase = `Jami ${data.totalBlok} blok × ${data.blokdona} dona = ${data.totalDona} dona × ${fmt(data.narx)} so'm = <b>${fmt(sum)} so'm</b>`;
+  else if(currentTolov==='vitrina') moneyPhrase = `Jami ${data.totalBlok} blok = ${data.totalDona} dona (vitrina — narxsiz)`;
+  else moneyPhrase = `Jami ${data.totalBlok} blok = ${data.totalDona} dona (narxsiz)`;
+
+  if(data.ownBlok > data.sklatdaBlok) {
+    calc.classList.add('error');
+    calc.innerHTML = `⚠️ "O'z skladdan" ${data.ownBlok} blok yozdingiz, lekin skladda faqat <b>${data.sklatdaBlok} blok</b> bor. Ortig'ini "Boshqa skladdan" qatoriga yozing.`;
     updateBasketTotal();
     return;
   }
-  if(data.narx>0) calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona × ${fmt(data.narx)} so'm = <b>${fmt(data.dona*data.narx)} so'm</b>`;
-  else if(currentTolov==='vitrina') calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona (vitrina — narxsiz)`;
-  else calc.innerHTML = `${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona (narxsiz)`;
-  if(data.blok > data.sklatdaBlok) {
-    calc.classList.add('error');
-    calc.innerHTML = `⚠️ Skladda faqat <b>${data.sklatdaBlok} blok</b> bor, ${data.blok} blok sota olmaysiz!`;
-  } else calc.innerHTML += ` — skladda ${data.sklatdaBlok} blok bor`;
+  const parts = [];
+  if(data.ownBlok>0) parts.push(`<b>${data.ownBlok} blok</b> o'z skladdan (skladda ${data.sklatdaBlok} bor)`);
+  if(data.tashqiBlok>0) { calc.classList.add('warn-tashqi'); parts.push(`<b>${data.tashqiBlok} blok</b> boshqa skladdan (🏪 tashqi — skladdan ayirilmaydi)`); }
+  if(!parts.length) { calc.innerHTML = `Miqdor kiriting: "O'z skladdan" yoki "Boshqa skladdan". Skladda ${data.sklatdaBlok} blok bor.`; updateBasketTotal(); return; }
+  calc.innerHTML = parts.join(' + ') + `<br>${moneyPhrase}`;
   updateBasketTotal();
 }
 
@@ -1112,7 +1127,7 @@ function updateBasketTotal() {
   document.querySelectorAll('.basket-item').forEach(item=>{
     const idx = item.id.replace('brow','');
     const data = getBasketItemData(idx);
-    if(data && data.narx>0) total += data.dona*data.narx;
+    if(data && data.narx>0) total += data.totalDona*data.narx;
   });
   document.getElementById('basket-total').textContent = `Jami: ${fmt(total)} so'm`;
 }
@@ -1171,13 +1186,17 @@ function sotuvSaqla() {
     const idx = item.id.replace('brow','');
     const data = getBasketItemData(idx);
     if(!data) return;
-    if(data.blok<=0) return;
-    if(!data.tashqi && data.sklatdaBlok < data.blok) { alert(`${data.nom} ${data.litr}L — skladda faqat ${data.sklatdaBlok} blok bor, ${data.blok} blok sota olmaysiz!`); invalid=true; return; }
-    items.push(data);
+    if(data.totalBlok<=0) return;
+    if(data.ownBlok > data.sklatdaBlok) { alert(`${data.nom} ${data.litr}L — skladda faqat ${data.sklatdaBlok} blok bor. "O'z skladdan" ${data.ownBlok} blok yoza olmaysiz. Ortig'ini "Boshqa skladdan" qatoriga yozing.`); invalid=true; return; }
+    // O'z skladdan olingan qism (skladdan ayiriladi)
+    if(data.ownBlok>0) items.push({ tashqi:false, key:data.key, nom:data.nom, litr:data.litr, blokdona:data.blokdona, blok:data.ownBlok, dona:data.ownBlok*data.blokdona, narx:data.narx });
+    // Boshqa (tashqi) skladdan olingan qism (skladdan ayirilmaydi)
+    if(data.tashqiBlok>0) items.push({ tashqi:true, key:data.key, nom:data.nom, litr:data.litr, blokdona:data.blokdona, blok:data.tashqiBlok, dona:data.tashqiBlok*data.blokdona, narx:data.narx });
   });
   if(invalid) return;
-  if(!items.length){alert("Kamida bitta aroq tanlang!");return;}
-  items.forEach(it=>{ if(!it.tashqi) sklad[it.key].blok -= it.blok; });
+  if(!items.length){alert("Kamida bitta aroq tanlang va miqdor (o'z skladdan yoki boshqa skladdan) kiriting!");return;}
+  // Faqat o'z skladdan olingan qism skladdan ayiriladi
+  items.forEach(it=>{ if(!it.tashqi && sklad[it.key]) sklad[it.key].blok -= it.blok; });
   const sotuvlar = load('sotuv');
   const groupId = 'g'+Date.now()+Math.random().toString(36).slice(2);
   sotuvlar.push({ groupId, sana, time, mijoz, izoh, tolov, qarzTolandi: tolov==='naqd', tolanganSana: tolov==='naqd'?sana:null, items });
