@@ -238,6 +238,12 @@ details.drop[open] > summary .drop-chevron { transform: rotate(90deg); }
 .rc-total .rt-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
 .rc-izoh { font-size: 12px; color: var(--text-secondary); font-style: italic; margin-top: 12px; background: var(--bg-secondary); padding: 8px 12px; border-radius: var(--radius-md); }
 .rc-close { margin-top: 1.2rem; }
+.confirm-box { background: var(--bg-primary); border-radius: var(--radius-lg); padding: 1.5rem; max-width: 380px; width: 100%; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+.confirm-title { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+.confirm-msg { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.3rem; line-height: 1.55; }
+.confirm-msg b { color: var(--text-primary); }
+.confirm-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.confirm-actions button { flex: 0 0 auto; }
 
 /* ============ DARK MODE (tungi rejim) ============ */
 html[data-theme="dark"] {
@@ -1352,14 +1358,67 @@ function renderKirimHisobot() {
   wrap.innerHTML = sessArr.map(sess=>{
     const sBlok = sess.rows.reduce((t,k)=>t+(k.blok||0),0);
     const sDona = sess.rows.reduce((t,k)=>t+(k.blok||0)*(k.blokdona||1),0);
-    const rowsHtml = sess.rows.map(k=>`<tr><td>${esc(k.nom)}</td><td>${k.litr}L</td><td><span class="qty-pill blok">${k.blok} blok</span></td><td><span class="qty-pill dona">${k.blok*(k.blokdona||1)} dona</span></td><td>${k.narx?fmt(k.narx)+" so'm":'—'}</td></tr>`).join('');
+    const rowsHtml = sess.rows.map(k=>{
+      const origIdx = kirimlar.indexOf(k);
+      return `<tr><td>${esc(k.nom)}</td><td>${k.litr}L</td><td><span class="qty-pill blok">${k.blok} blok</span></td><td><span class="qty-pill dona">${k.blok*(k.blokdona||1)} dona</span></td><td>${k.narx?fmt(k.narx)+" so'm":'—'}</td><td><button class="icon-btn danger kirim-del" data-kirim-idx="${origIdx}">🗑️ O'chir</button></td></tr>`;
+    }).join('');
     return `<div class="kirim-card"><details class="drop"><summary>
         <span class="drop-title"><span class="drop-chevron">▶</span>📥 ${dateDisplay(sess.sana)} · ${sess.time||'—'}</span>
         <span class="drop-meta"><span class="qty-pill blok">${sBlok} blok</span><span class="qty-pill dona">${sDona} dona</span><span>${sess.rows.length} ta aroq</span></span>
       </summary><div class="drop-body"><div class="table-wrap"><table>
-        <thead><tr><th>Aroq</th><th>Litr</th><th>Bloklar</th><th>Donalar</th><th>Narx</th></tr></thead>
+        <thead><tr><th>Aroq</th><th>Litr</th><th>Bloklar</th><th>Donalar</th><th>Narx</th><th>Amal</th></tr></thead>
         <tbody>${rowsHtml}</tbody></table></div></div></details></div>`;
   }).join('');
+  wrap.querySelectorAll('.kirim-del').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); askDeleteKirim(parseInt(btn.dataset.kirimIdx)); });
+  });
+}
+
+/* Tasdiqlash oynasi (umumiy) */
+function showConfirm(title, message, onYes) {
+  const html = `<div class="receipt-overlay" id="confirm-overlay-bg"><div class="confirm-box">
+    <div class="confirm-title">${title}</div>
+    <div class="confirm-msg">${message}</div>
+    <div class="confirm-actions">
+      <button class="cancel-confirm" id="confirm-no">Bekor qilish</button>
+      <button class="danger-confirm" id="confirm-yes">🗑️ Ha, o'chir</button>
+    </div>
+  </div></div>`;
+  document.getElementById('receipt-modal').innerHTML = html;
+  document.getElementById('confirm-overlay-bg').addEventListener('click', e=>{ if(e.target.id==='confirm-overlay-bg') closeReceipt(); });
+  document.getElementById('confirm-no').addEventListener('click', closeReceipt);
+  document.getElementById('confirm-yes').addEventListener('click', ()=>{ closeReceipt(); onYes(); });
+}
+
+/* Bitta kirim yozuvini o'chirish — sklatdan o'sha bloklar ayriladi, lekin aroq yo'qolmaydi */
+function askDeleteKirim(idx) {
+  const kirimlar = load('kirim');
+  const rec = kirimlar[idx];
+  if(!rec) return;
+  const sklad = load('sklad');
+  const cur = sklad[rec.key] ? (sklad[rec.key].blok||0) : 0;
+  const after = Math.max(0, cur - (rec.blok||0));
+  showConfirm(
+    "Kirimni o'chirish",
+    `<b>${esc(rec.nom)} ${rec.litr}L</b> — ${dateDisplay(rec.sana)} ${rec.time||''} dagi kirimni o'chirasizmi?<br><br>` +
+    `Bu kirimda <b>${rec.blok} blok</b> qo'shilgan. O'chirilsa, skladdan shu bloklar ayriladi (aroqning o'zi yo'qolmaydi).<br><br>` +
+    `Skladda hozir: <b>${cur} blok</b> → o'chgandan keyin: <b>${after} blok</b>.`,
+    ()=>deleteKirim(idx)
+  );
+}
+
+function deleteKirim(idx) {
+  const kirimlar = load('kirim');
+  const rec = kirimlar[idx];
+  if(!rec) return;
+  const sklad = load('sklad');
+  if(sklad[rec.key]) sklad[rec.key].blok = Math.max(0, (sklad[rec.key].blok||0) - (rec.blok||0));
+  kirimlar.splice(idx, 1);
+  save('kirim', kirimlar);
+  save('sklad', sklad);
+  showToast(`🗑️ Kirim o'chirildi — ${rec.nom} ${rec.litr}L (${rec.blok} blok skladdan ayrildi)`);
+  renderKirimHisobot();
+  renderSklad();
 }
 
 /* ============ SOTUV HISOBOT ============ */
