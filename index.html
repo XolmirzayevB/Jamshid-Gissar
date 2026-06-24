@@ -40,14 +40,19 @@ button.primary { background: var(--bg-info); color: var(--text-info); border: no
 button.primary:hover { opacity: 0.85; }
 button.danger-confirm { background: var(--bg-danger); color: var(--text-danger); border: none; padding: 8px 14px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; font-weight: 500; }
 button.cancel-confirm { background: transparent; border: 0.5px solid var(--border-secondary); color: var(--text-secondary); padding: 8px 14px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; }
-.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1rem; }
-.metric { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 1rem; border-left: 3px solid var(--border-secondary); }
-.metric.m-green { border-left-color: #34a853; }
-.metric.m-amber { border-left-color: #f9ab00; }
-.metric.m-blue { border-left-color: #4285f4; }
-.metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
-.metric-val { font-size: 20px; font-weight: 600; color: var(--text-primary); }
-.metric-sub { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 1rem; }
+.metric { background: #eef1f6; border-radius: var(--radius-lg); padding: 1rem 1.1rem; border-left: 4px solid #b6bfcc; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.metric-label { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+.metric-val { font-size: 22px; font-weight: 700; color: #3c4a5e; line-height: 1.15; }
+.metric-sub { font-size: 11px; color: var(--text-secondary); margin-top: 4px; }
+.metric.m-slate  { background: #eef1f6; border-left-color: #5f6f86; } .metric.m-slate .metric-val { color: #3c4a5e; }
+.metric.m-green  { background: #e7f6ee; border-left-color: #34a853; } .metric.m-green .metric-val { color: #137333; }
+.metric.m-amber  { background: #fdf3e0; border-left-color: #f9ab00; } .metric.m-amber .metric-val { color: #b06000; }
+.metric.m-blue   { background: #e7f0fe; border-left-color: #4285f4; } .metric.m-blue .metric-val { color: #1967d2; }
+.metric.m-purple { background: #f4e9fd; border-left-color: #8e44ec; } .metric.m-purple .metric-val { color: #6a1b9a; }
+.metric.m-red    { background: #fdecea; border-left-color: #ea4335; } .metric.m-red .metric-val { color: #c5221f; }
+.metric.m-teal   { background: #def7f4; border-left-color: #12b5a5; } .metric.m-teal .metric-val { color: #00796b; }
+.metric.m-pink   { background: #fdeaf3; border-left-color: #e84393; } .metric.m-pink .metric-val { color: #ad1457; }
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th { text-align: left; padding: 8px 10px; border-bottom: 0.5px solid var(--border-secondary); color: var(--text-secondary); font-weight: 500; white-space: nowrap; }
@@ -146,6 +151,78 @@ h1.page-title { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
 @media (max-width: 700px) {
   .edit-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* ===== Ixcham (compact) sotuv kartalari ===== */
+.sale-compact { background: var(--bg-primary); border: 0.5px solid var(--border-tertiary); border-left: 4px solid var(--border-secondary); border-radius: var(--radius-lg); padding: 12px 16px; margin-bottom: 10px; cursor: pointer; transition: box-shadow 0.15s, transform 0.05s; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.sale-compact:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.09); }
+.sale-compact:active { transform: scale(0.997); }
+.sale-compact.gs-naqd { border-left-color: #34a853; }
+.sale-compact.gs-qarz-open { border-left-color: #f9ab00; }
+.sale-compact.gs-qarz-paid { border-left-color: #4285f4; }
+.sale-compact.gs-vitrina { border-left-color: #8e44ec; }
+.sc-left { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.sc-name { font-weight: 700; font-size: 15px; color: var(--text-primary); }
+.sc-meta { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sc-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.sc-sum { font-weight: 700; font-size: 15px; color: var(--text-primary); white-space: nowrap; }
+.sc-tap { font-size: 11px; color: var(--text-tertiary); }
+
+/* ===== Kirim sessiya kartalari va dropdown ===== */
+.kirim-card { background: var(--bg-primary); border: 0.5px solid var(--border-tertiary); border-left: 4px solid #12b5a5; border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden; }
+details.drop > summary { list-style: none; cursor: pointer; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+details.drop > summary::-webkit-details-marker { display: none; }
+details.drop > summary:hover { background: var(--bg-secondary); }
+.drop-title { font-weight: 700; font-size: 14px; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.drop-chevron { display: inline-block; transition: transform 0.2s; color: var(--text-tertiary); font-size: 13px; }
+details.drop[open] > summary .drop-chevron { transform: rotate(90deg); }
+.drop-meta { font-size: 12px; color: var(--text-secondary); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.drop-body { padding: 4px 16px 14px 16px; border-top: 0.5px solid var(--border-tertiary); }
+
+/* ===== Mijoz detali (umumiy hisobot) ===== */
+.cust-card { background: var(--bg-primary); border: 0.5px solid var(--border-tertiary); border-left: 4px solid #4285f4; border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden; }
+.cust-rank { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #e7f0fe; color: #1967d2; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+.subdrop { background: var(--bg-secondary); border-radius: var(--radius-md); margin-bottom: 8px; overflow: hidden; }
+.subdrop > summary { list-style: none; cursor: pointer; padding: 9px 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.subdrop > summary::-webkit-details-marker { display: none; }
+.subdrop[open] > summary .drop-chevron { transform: rotate(90deg); }
+.subdrop-body { padding: 2px 12px 10px 12px; }
+.mini-sale { border-top: 0.5px solid var(--border-tertiary); padding: 8px 0; }
+.mini-sale:first-child { border-top: none; }
+.mini-sale-head { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600; }
+.mini-line { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 2px 0; gap: 8px; }
+.mini-line .ml-name { flex: 1; color: var(--text-primary); }
+.cust-totals { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--border-secondary); }
+.tot-chip { background: var(--bg-secondary); border-radius: var(--radius-md); padding: 6px 12px; font-size: 12px; font-weight: 600; }
+.tot-chip b { font-size: 14px; }
+.tot-chip.sold { background: #e7f0fe; color: #1967d2; }
+.tot-chip.vit { background: #f4e9fd; color: #6a1b9a; }
+.tot-chip.all { background: #e7f6ee; color: #137333; }
+
+/* ===== Yangi, chiroyli chek ===== */
+.receipt-box2 { background: var(--bg-primary); border-radius: var(--radius-lg); padding: 0; max-width: 400px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+.rc-top { padding: 1.4rem 1.5rem 1.1rem; text-align: center; color: #fff; }
+.rc-top.t-naqd { background: linear-gradient(135deg, #34a853, #1e8e4f); }
+.rc-top.t-qarz-open { background: linear-gradient(135deg, #f9ab00, #e08600); }
+.rc-top.t-qarz-paid { background: linear-gradient(135deg, #4285f4, #1967d2); }
+.rc-top.t-vitrina { background: linear-gradient(135deg, #8e44ec, #6a1b9a); }
+.rc-logo { font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+.rc-sub { font-size: 12px; opacity: 0.9; margin-top: 2px; }
+.rc-paychip { display: inline-block; margin-top: 10px; background: rgba(255,255,255,0.22); padding: 4px 14px; border-radius: 100px; font-size: 13px; font-weight: 600; }
+.rc-body { padding: 1.2rem 1.5rem 1.5rem; }
+.rc-info { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+.rc-info .lbl { color: var(--text-secondary); }
+.rc-info .val { font-weight: 600; color: var(--text-primary); }
+.rc-divider { border-top: 1.5px dashed var(--border-secondary); margin: 14px 0; }
+.rc-item { margin-bottom: 12px; }
+.rc-item .ri-name { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.rc-item .ri-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+.rc-item .ri-sum { font-weight: 700; color: var(--text-primary); font-size: 13px; }
+.rc-pills { display: flex; gap: 6px; margin: 4px 0; }
+.rc-total { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 12px 14px; background: var(--bg-secondary); border-radius: var(--radius-md); }
+.rc-total .rt-lbl { font-size: 13px; color: var(--text-secondary); font-weight: 600; }
+.rc-total .rt-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+.rc-izoh { font-size: 12px; color: var(--text-secondary); font-style: italic; margin-top: 12px; background: var(--bg-secondary); padding: 8px 12px; border-radius: var(--radius-md); }
+.rc-close { margin-top: 1.2rem; }
 </style>
 </head>
 <body>
@@ -282,14 +359,7 @@ h1.page-title { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
   </div>
   <div class="filter-range-note" id="kh-filter-display"></div>
   <div id="kh-metrics" class="metric-grid" style="margin-top:1rem"></div>
-  <div class="card" style="margin-top:1rem">
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Sana</th><th>Soat</th><th>Aroq</th><th>Litr</th><th>Bloklar</th><th>Donalar</th><th>Narx</th></tr></thead>
-        <tbody id="kh-tbody"></tbody>
-      </table>
-    </div>
-  </div>
+  <div id="kh-list" style="margin-top:1rem"></div>
 </div>
 
 <!-- HISOBOT -->
@@ -319,15 +389,8 @@ h1.page-title { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
       </table>
     </div>
   </div>
-  <div class="card" style="margin-top:1rem">
-    <div class="section-title" style="font-size:14px; margin-bottom:8px;">Eng ko'p xarid qilgan mijozlar</div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>№</th><th>Mijoz</th><th>Sotuvlar soni</th><th>Jami blok</th><th>Jami summa</th></tr></thead>
-        <tbody id="umumiy-mijoz-tbody"></tbody>
-      </table>
-    </div>
-  </div>
+  <div class="section-title" style="font-size:15px; margin:1.4rem 0 0.7rem;">Eng ko'p xarid qilgan mijozlar <span style="font-size:12px; color:var(--text-tertiary); font-weight:400">(mijoz ustiga bosib, oldan tovarlarini ko'ring)</span></div>
+  <div id="umumiy-mijoz-list"></div>
 </div>
 
 </div>
@@ -476,9 +539,18 @@ const CATALOG = [
   {nom:"Zapovednik Tsarskaya Polyana",litr:"0.7",blokdona:12,narx:46500}
 ];
 
-function today() { return new Date().toISOString().slice(0,10); }
+function today() {
+  // Mahalliy (Toshkent) vaqti bo'yicha sana — UTC emas, aks holda kechqurun/tunda sana noto'g'ri bo'ladi
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function nowTime() { const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
 function fmt(n) { return Math.round(n||0).toLocaleString(); }
+/* Bitta sotuv qatoridagi donalar soni (blok × blokdona). Eski yozuvlar uchun zaxira hisob ham bor. */
+function itemDona(it) { return it.dona || (it.blok * (it.blokdona || 1)); }
+/* Bitta sotuv qatorining summasi — narx HAR DOIM bitta donaga, shuning uchun donalar soniga ko'paytiriladi
+   (tashqi/skladda bor — farqi yo'q). Bu avvalgi "blok × narx" xatosini to'g'irlaydi. */
+function itemSum(it) { return it.narx ? itemDona(it) * it.narx : 0; }
 function aroqKey(nom, litr) { return nom.trim() + '__' + litr; }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/'/g,"&#39;").replace(/"/g,"&quot;").replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function dateDisplay(isoDate) {
@@ -522,8 +594,16 @@ function showTab(name) {
     renderSotuvlar();
   }
   if(name==='qarz') renderQarzlar();
-  if(name==='kirimhisobot') { updateKhFilterDisplay(); renderKirimHisobot(); }
-  if(name==='hisobot') { updateHisobFilterDisplay(); renderHisobot(); }
+  if(name==='kirimhisobot') {
+    const d=document.getElementById('kh-dan'), g=document.getElementById('kh-gacha');
+    if(!d.value && !g.value) { d.value=today(); g.value=today(); }
+    updateKhFilterDisplay(); renderKirimHisobot();
+  }
+  if(name==='hisobot') {
+    const d=document.getElementById('hisob-dan'), g=document.getElementById('hisob-gacha');
+    if(!d.value && !g.value) { d.value=today(); g.value=today(); }
+    updateHisobFilterDisplay(); renderHisobot();
+  }
   if(name==='umumiy') renderUmumiyHisobot();
   if(name==='kirim') {
     const i=document.getElementById('kirim-sana'); if(!i.value) i.value=today();
@@ -585,10 +665,10 @@ function renderSklad() {
   const totalDona = allKeys.reduce((s,k)=>s+(sklad[k].blok||0)*(sklad[k].blokdona||1),0);
   const withStock = allKeys.filter(k=>sklad[k].blok>0).length;
   metrics.innerHTML=`
-    <div class="metric"><div class="metric-label">Jami turlar</div><div class="metric-val">${allKeys.length}</div></div>
+    <div class="metric m-slate"><div class="metric-label">Jami turlar</div><div class="metric-val">${allKeys.length}</div></div>
     <div class="metric m-green"><div class="metric-label">Skladda bor turlar</div><div class="metric-val">${withStock}</div></div>
     <div class="metric m-blue"><div class="metric-label">Jami bloklar</div><div class="metric-val">${totalBlok}</div></div>
-    <div class="metric m-blue"><div class="metric-label">Jami donalar</div><div class="metric-val">${totalDona}</div></div>
+    <div class="metric m-purple"><div class="metric-label">Jami donalar</div><div class="metric-val">${totalDona}</div></div>
   `;
   if(!keys.length) { tbody.innerHTML='<tr><td colspan="9" class="empty">Hech narsa topilmadi</td></tr>'; return; }
   // skladda bor (blok>0) birinchi, keyin nomi bo'yicha, so'ng yo'qlar nomi bo'yicha
@@ -914,7 +994,7 @@ function updateBasketCalc(idx) {
   if(data.tashqi) {
     calc.classList.add('warn-tashqi');
     let line = `ℹ️ "${esc(data.nom)} ${data.litr}L" bizning skladda yo'q (0 blok) — boshqa joydan olib sotilayotgan deb hisoblanadi, bizning skladdan ayirilmaydi.`;
-    if(data.narx>0) line += ` ${data.blok} blok × ${fmt(data.narx)} so'm = <b>${fmt(data.blok*data.narx)} so'm</b>`;
+    if(data.narx>0) line += ` ${data.blok} blok × ${data.blokdona} dona = ${data.dona} dona × ${fmt(data.narx)} so'm = <b>${fmt(data.dona*data.narx)} so'm</b>`;
     calc.innerHTML = line;
     updateBasketTotal();
     return;
@@ -934,7 +1014,7 @@ function updateBasketTotal() {
   document.querySelectorAll('.basket-item').forEach(item=>{
     const idx = item.id.replace('brow','');
     const data = getBasketItemData(idx);
-    if(data && data.narx>0) { if(data.tashqi) total += data.blok*data.narx; else total += data.dona*data.narx; }
+    if(data && data.narx>0) total += data.dona*data.narx;
   });
   document.getElementById('basket-total').textContent = `Jami: ${fmt(total)} so'm`;
 }
@@ -1025,40 +1105,35 @@ function saleCardClass(s) {
 }
 
 function groupTotal(s) {
-  return (s.items||[]).reduce((t,it)=>{
-    if(!it.narx) return t;
-    if(it.tashqi) return t + it.blok*it.narx;
-    return t + it.dona*it.narx;
-  }, 0);
+  return (s.items||[]).reduce((t,it)=>t + itemSum(it), 0);
 }
 function groupBlok(s) { return (s.items||[]).reduce((t,it)=>t + it.blok, 0); }
-function groupDona(s) { return (s.items||[]).reduce((t,it)=>t + (it.dona||it.blok), 0); }
+function groupDona(s) { return (s.items||[]).reduce((t,it)=>t + itemDona(it), 0); }
 
 function renderGroupedSale(s, opts) {
   opts = opts || {};
   const total = groupTotal(s);
-  const linesHtml = (s.items||[]).map(it=>{
-    const sum = it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
-    const dona = it.dona || it.blok;
-    return `<div class="grouped-line">
-      <span class="gl-name">${esc(it.nom)} ${it.litr}L</span>
-      <span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${dona} dona</span></span>
-      <span class="gl-sum">${it.narx?fmt(sum)+' so\'m':'—'}</span>
-    </div>`;
-  }).join('');
-  const izohHtml = s.izoh ? `<div class="grouped-izoh">📝 ${esc(s.izoh)}</div>` : '';
-  const payBtnHtml = (s.tolov==='qarz' && !s.qarzTolandi && opts.showPayBtn) ? `<button class="pay-btn" data-pay-group="${esc(s.groupId)}">✅ To'landi</button>` : '<span></span>';
-  return `<div class="grouped-sale ${saleCardClass(s)}" data-sale-group="${esc(s.groupId)}">
-    <div class="grouped-head"><span class="name">${esc(s.mijoz)}</span><span class="meta">${dateDisplay(s.sana)} ${s.time||''}</span></div>
-    ${linesHtml}
-    ${izohHtml}
-    <div class="grouped-total-row"><span>Jami: ${groupBlok(s)} blok / ${groupDona(s)} dona</span><span>${total?fmt(total)+' so\'m':'—'}</span></div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px"><span>${tolovBadge(s.tolov, s.qarzTolandi)}</span>${payBtnHtml}</div>
+  const blok = groupBlok(s);
+  const dona = groupDona(s);
+  const itemCount = (s.items||[]).length;
+  const payBtnHtml = (s.tolov==='qarz' && !s.qarzTolandi && opts.showPayBtn) ? `<button class="pay-btn" data-pay-group="${esc(s.groupId)}">✅ To'landi</button>` : '';
+  return `<div class="sale-compact ${saleCardClass(s)}" data-sale-group="${esc(s.groupId)}">
+    <div class="sc-left">
+      <span class="sc-name">${esc(s.mijoz)}</span>
+      <span class="sc-meta">${dateDisplay(s.sana)} ${s.time||''} · ${itemCount} xil ${tolovBadge(s.tolov, s.qarzTolandi)}</span>
+    </div>
+    <div class="sc-right">
+      <span class="qty-pill blok">${blok} blok</span>
+      <span class="qty-pill dona">${dona} dona</span>
+      <span class="sc-sum">${total?fmt(total)+" so'm":'—'}</span>
+      ${payBtnHtml}
+      <span class="sc-tap">👁️ chek</span>
+    </div>
   </div>`;
 }
 
 function attachSaleCardHandlers(container) {
-  container.querySelectorAll('.grouped-sale').forEach(card=>{
+  container.querySelectorAll('.sale-compact').forEach(card=>{
     card.addEventListener('click', (e)=>{
       if(e.target.closest('[data-pay-group]')) return;
       const sotuvlar = load('sotuv');
@@ -1098,7 +1173,7 @@ function renderQarzlar() {
   const ochiq=qarzlar.filter(s=>!s.qarzTolandi);
   const ochiqSum=ochiq.reduce((t,s)=>t+groupTotal(s),0);
   const yopiq=qarzlar.filter(s=>s.qarzTolandi);
-  metrics.innerHTML=`<div class="metric m-amber"><div class="metric-label">Ochiq qarzlar</div><div class="metric-val">${ochiq.length}</div></div><div class="metric m-amber"><div class="metric-label">Ochiq summa</div><div class="metric-val">${fmt(ochiqSum)} so'm</div></div><div class="metric m-green"><div class="metric-label">To'langan</div><div class="metric-val">${yopiq.length}</div></div>`;
+  metrics.innerHTML=`<div class="metric m-amber"><div class="metric-label">Ochiq qarzlar</div><div class="metric-val">${ochiq.length}</div></div><div class="metric m-red"><div class="metric-label">Ochiq summa</div><div class="metric-val">${fmt(ochiqSum)} so'm</div></div><div class="metric m-green"><div class="metric-label">To'langan</div><div class="metric-val">${yopiq.length}</div></div>`;
   if(!qarzlar.length){wrap.innerHTML='<div class="empty">Qarz yo\'q</div>';return;}
   wrap.innerHTML=[...qarzlar].reverse().map(s=>renderGroupedSale(s,{showPayBtn:true})).join('');
   attachSaleCardHandlers(wrap);
@@ -1116,13 +1191,36 @@ function qarzTola(groupId) {
 function showReceipt(s) {
   const total = groupTotal(s);
   const blok = groupBlok(s);
+  const dona = groupDona(s);
+  const payClass = s.tolov==='naqd' ? 't-naqd' : s.tolov==='vitrina' ? 't-vitrina' : (s.qarzTolandi ? 't-qarz-paid' : 't-qarz-open');
+  const tolovText = s.tolov==='naqd' ? '💵 Naqd pul' : s.tolov==='vitrina' ? "🏪 Do'konga (vitrina)" : (s.qarzTolandi ? "💳 Qarzga (to'landi)" : "💳 Qarzga (ochiq)");
   const itemsHtml = (s.items||[]).map(it=>{
-    const sum = it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
-    return `<div class="receipt-item"><div class="iname">${esc(it.nom)} ${it.litr}L</div><div class="idetail"><span>${it.blok} blok × ${it.blokdona} = ${it.dona} dona</span><span>${it.narx?fmt(it.narx)+'/dona':'—'}</span></div><div class="idetail"><span></span><span><b>${it.narx?fmt(sum)+' so\'m':'—'}</b></span></div></div>`;
-  }).join('<div class="receipt-line"></div>');
-  const tolovText = s.tolov==='naqd' ? 'Naqd pul' : s.tolov==='vitrina' ? "Do'konga (vitrina)" : (s.qarzTolandi ? "Qarzga (to'landi)" : "Qarzga (ochiq)");
-  const izohHtml = s.izoh ? `<div class="receipt-row" style="margin-top:8px"><span style="font-style:italic; color:var(--text-secondary)">Izoh: ${esc(s.izoh)}</span></div>` : '';
-  const html = `<div class="receipt-overlay" id="receipt-overlay-bg"><div class="receipt-box"><div class="receipt-header"><div class="title">ALKO MARKET</div><div class="sub">Sotuv cheki</div></div><div class="receipt-row"><span>Mijoz:</span><span><b>${esc(s.mijoz)}</b></span></div><div class="receipt-row"><span>Sana:</span><span>${dateDisplay(s.sana)} ${s.time||''}</span></div><div class="receipt-row"><span>To'lov:</span><span>${tolovText}</span></div><div class="receipt-line"></div>${itemsHtml}<div class="receipt-total"><span>JAMI (${blok} blok):</span><span>${total?fmt(total)+" so'm":'—'}</span></div>${izohHtml}<button class="primary receipt-close" id="receipt-close-btn">Yopish</button></div></div>`;
+    const sum = itemSum(it);
+    const d = itemDona(it);
+    return `<div class="rc-item">
+      <div class="ri-name">${esc(it.nom)} ${it.litr}L</div>
+      <div class="rc-pills"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${d} dona</span></div>
+      <div class="ri-row"><span>${it.narx?fmt(it.narx)+" so'm / dona":'narxsiz'}</span><span class="ri-sum">${it.narx?fmt(sum)+" so'm":'—'}</span></div>
+    </div>`;
+  }).join('');
+  const izohHtml = s.izoh ? `<div class="rc-izoh">📝 ${esc(s.izoh)}</div>` : '';
+  const html = `<div class="receipt-overlay" id="receipt-overlay-bg"><div class="receipt-box2">
+    <div class="rc-top ${payClass}">
+      <div class="rc-logo">🍷 ALKO MARKET</div>
+      <div class="rc-sub">Sotuv cheki</div>
+      <div class="rc-paychip">${tolovText}</div>
+    </div>
+    <div class="rc-body">
+      <div class="rc-info"><span class="lbl">Mijoz</span><span class="val">${esc(s.mijoz)}</span></div>
+      <div class="rc-info"><span class="lbl">Sana</span><span class="val">${dateDisplay(s.sana)} ${s.time||''}</span></div>
+      <div class="rc-divider"></div>
+      ${itemsHtml}
+      <div class="rc-divider"></div>
+      <div class="rc-total"><span class="rt-lbl">JAMI · ${blok} blok / ${dona} dona</span><span class="rt-val">${total?fmt(total)+" so'm":'—'}</span></div>
+      ${izohHtml}
+      <button class="primary rc-close" id="receipt-close-btn">Yopish</button>
+    </div>
+  </div></div>`;
   document.getElementById('receipt-modal').innerHTML = html;
   document.getElementById('receipt-overlay-bg').addEventListener('click', (e)=>{ if(e.target.id === 'receipt-overlay-bg') closeReceipt(); });
   document.getElementById('receipt-close-btn').addEventListener('click', closeReceipt);
@@ -1138,13 +1236,33 @@ function renderKirimHisobot() {
   let list=[...kirimlar];
   if(dan) list=list.filter(k=>k.sana>=dan);
   if(gacha) list=list.filter(k=>k.sana<=gacha);
-  list = list.reverse();
   const totalBlok = list.reduce((t,k)=>t+(k.blok||0),0);
   const totalDona = list.reduce((t,k)=>t+(k.blok||0)*(k.blokdona||1),0);
-  document.getElementById('kh-metrics').innerHTML=`<div class="metric"><div class="metric-label">Kirim yozuvlari</div><div class="metric-val">${list.length}</div></div><div class="metric m-blue"><div class="metric-label">Jami kirim bloklar</div><div class="metric-val">${totalBlok}</div></div><div class="metric m-blue"><div class="metric-label">Jami kirim donalar</div><div class="metric-val">${totalDona}</div></div>`;
-  const tbody = document.getElementById('kh-tbody');
-  if(!list.length) { tbody.innerHTML='<tr><td colspan="7" class="empty">Kirim tarixi yo\'q</td></tr>'; return; }
-  tbody.innerHTML = list.map(k=>`<tr><td>${dateDisplay(k.sana)}</td><td>${k.time||'—'}</td><td>${esc(k.nom)}</td><td>${k.litr}L</td><td><span class="qty-pill blok">${k.blok} blok</span></td><td><span class="qty-pill dona">${k.blok*(k.blokdona||1)} dona</span></td><td>${k.narx?fmt(k.narx)+' so\'m':'—'}</td></tr>`).join('');
+  // Bir vaqtda qilingan kirimlarni bitta sessiyaga guruhlash (sana + soat)
+  const sessions = {};
+  list.forEach(k=>{
+    const key = k.sana + ' ' + (k.time||'');
+    if(!sessions[key]) sessions[key] = { sana:k.sana, time:k.time||'', rows:[] };
+    sessions[key].rows.push(k);
+  });
+  const sessArr = Object.values(sessions).sort((a,b)=>(b.sana+b.time).localeCompare(a.sana+a.time));
+  document.getElementById('kh-metrics').innerHTML=`
+    <div class="metric m-slate"><div class="metric-label">Kirim sessiyalari</div><div class="metric-val">${sessArr.length}</div></div>
+    <div class="metric m-teal"><div class="metric-label">Jami kirim bloklar</div><div class="metric-val">${totalBlok}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami kirim donalar</div><div class="metric-val">${totalDona}</div></div>`;
+  const wrap = document.getElementById('kh-list');
+  if(!sessArr.length) { wrap.innerHTML = '<div class="empty">Bu sanada kirim yo\'q. Boshqa kunni ko\'rish uchun yuqoridagi sanani o\'zgartiring yoki tozalang.</div>'; return; }
+  wrap.innerHTML = sessArr.map(sess=>{
+    const sBlok = sess.rows.reduce((t,k)=>t+(k.blok||0),0);
+    const sDona = sess.rows.reduce((t,k)=>t+(k.blok||0)*(k.blokdona||1),0);
+    const rowsHtml = sess.rows.map(k=>`<tr><td>${esc(k.nom)}</td><td>${k.litr}L</td><td><span class="qty-pill blok">${k.blok} blok</span></td><td><span class="qty-pill dona">${k.blok*(k.blokdona||1)} dona</span></td><td>${k.narx?fmt(k.narx)+" so'm":'—'}</td></tr>`).join('');
+    return `<div class="kirim-card"><details class="drop"><summary>
+        <span class="drop-title"><span class="drop-chevron">▶</span>📥 ${dateDisplay(sess.sana)} · ${sess.time||'—'}</span>
+        <span class="drop-meta"><span class="qty-pill blok">${sBlok} blok</span><span class="qty-pill dona">${sDona} dona</span><span>${sess.rows.length} ta aroq</span></span>
+      </summary><div class="drop-body"><div class="table-wrap"><table>
+        <thead><tr><th>Aroq</th><th>Litr</th><th>Bloklar</th><th>Donalar</th><th>Narx</th></tr></thead>
+        <tbody>${rowsHtml}</tbody></table></div></div></details></div>`;
+  }).join('');
 }
 
 /* ============ SOTUV HISOBOT ============ */
@@ -1170,14 +1288,14 @@ function renderHisobot() {
   const vitrinaBlok=vitrina.reduce((t,s)=>t+groupBlok(s),0);
   const totalBlok=list.reduce((t,s)=>t+groupBlok(s),0);
   document.getElementById('hisob-metrics').innerHTML=`
-    <div class="metric"><div class="metric-label">Jami sotuvlar</div><div class="metric-val">${list.length}</div></div>
+    <div class="metric m-slate"><div class="metric-label">Jami sotuvlar</div><div class="metric-val">${list.length}</div></div>
     <div class="metric m-blue"><div class="metric-label">Jami bloklar</div><div class="metric-val">${totalBlok}</div></div>
     <div class="metric m-green"><div class="metric-label">Jami tushum (naqd + to'langan qarz)</div><div class="metric-val">${fmt(totalRealizedIncome)} so'm</div><div class="metric-sub">Naqddan: ${fmt(naqdDirectSum)} so'm · Qarzdan tushgan: ${fmt(qarzPaidSum)} so'm</div></div>
     <div class="metric m-amber"><div class="metric-label">Ochiq qarz (hali to'lanmagan)</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
-    <div class="metric"><div class="metric-label">Vitrinaga berilgan blok</div><div class="metric-val">${vitrinaBlok}</div></div>
+    <div class="metric m-purple"><div class="metric-label">Vitrinaga berilgan blok</div><div class="metric-val">${vitrinaBlok}</div></div>
   `;
   const wrap=document.getElementById('hisob-list');
-  if(!list.length){wrap.innerHTML='<div class="empty">Ma\'lumot yo\'q</div>';return;}
+  if(!list.length){wrap.innerHTML='<div class="empty">Bu sanada sotuv yo\'q. Boshqa kunni ko\'rish uchun yuqoridagi sanani o\'zgartiring yoki tozalang.</div>';return;}
   wrap.innerHTML = list.map(s=>renderGroupedSale(s,{showPayBtn:false})).join('');
   attachSaleCardHandlers(wrap);
 }
@@ -1191,7 +1309,7 @@ function renderUmumiyHisobot() {
   if(!sotuvlar.length && !kirimlar.length) {
     document.getElementById('umumiy-metrics').innerHTML = '<div class="empty">Hali hech qanday kirim yoki sotuv kiritilmagan</div>';
     document.getElementById('umumiy-top-tbody').innerHTML = '<tr><td colspan="5" class="empty">Ma\'lumot yo\'q</td></tr>';
-    document.getElementById('umumiy-mijoz-tbody').innerHTML = '<tr><td colspan="5" class="empty">Ma\'lumot yo\'q</td></tr>';
+    document.getElementById('umumiy-mijoz-list').innerHTML = '<div class="empty">Ma\'lumot yo\'q</div>';
     return;
   }
 
@@ -1214,14 +1332,14 @@ function renderUmumiyHisobot() {
   const uniqueMijozlar = new Set(sotuvlar.map(s=>s.mijoz)).size;
 
   document.getElementById('umumiy-metrics').innerHTML = `
-    <div class="metric"><div class="metric-label">Ish boshlangan sana</div><div class="metric-val" style="font-size:16px">${dateDisplay(boshlanganSana)}</div></div>
-    <div class="metric"><div class="metric-label">Jami sotuvlar soni</div><div class="metric-val">${sotuvlar.length}</div></div>
-    <div class="metric m-blue"><div class="metric-label">Jami sotilgan blok</div><div class="metric-val">${totalSotuvBlok}</div></div>
-    <div class="metric m-blue"><div class="metric-label">Jami kirim qilingan blok</div><div class="metric-val">${totalKirimBlok}</div></div>
+    <div class="metric m-slate"><div class="metric-label">Ish boshlangan sana</div><div class="metric-val" style="font-size:17px">${dateDisplay(boshlanganSana)}</div></div>
+    <div class="metric m-blue"><div class="metric-label">Jami sotuvlar soni</div><div class="metric-val">${sotuvlar.length}</div></div>
+    <div class="metric m-purple"><div class="metric-label">Jami sotilgan blok</div><div class="metric-val">${totalSotuvBlok}</div></div>
+    <div class="metric m-teal"><div class="metric-label">Jami kirim qilingan blok</div><div class="metric-val">${totalKirimBlok}</div></div>
     <div class="metric m-green"><div class="metric-label">Jami tushum (naqd + to'langan qarz)</div><div class="metric-val">${fmt(totalIncome)} so'm</div><div class="metric-sub">Naqddan: ${fmt(naqdSum)} so'm · Qarzdan: ${fmt(qarzPaidSum)} so'm</div></div>
-    <div class="metric m-amber"><div class="metric-label">Hali to'lanmagan jami qarz</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
-    <div class="metric"><div class="metric-label">Vitrinaga berilgan jami blok</div><div class="metric-val">${vitrinaBlok}</div></div>
-    <div class="metric"><div class="metric-label">Jami mijozlar soni</div><div class="metric-val">${uniqueMijozlar}</div></div>
+    <div class="metric m-red"><div class="metric-label">Hali to'lanmagan jami qarz</div><div class="metric-val">${fmt(qarzOpenSum)} so'm</div></div>
+    <div class="metric m-pink"><div class="metric-label">Vitrinaga berilgan jami blok</div><div class="metric-val">${vitrinaBlok}</div></div>
+    <div class="metric m-amber"><div class="metric-label">Jami mijozlar soni</div><div class="metric-val">${uniqueMijozlar}</div></div>
   `;
 
   // TOP aroqlar
@@ -1231,8 +1349,8 @@ function renderUmumiyHisobot() {
       const k = it.nom + ' ' + it.litr + 'L';
       if(!aroqStats[k]) aroqStats[k] = {blok:0, dona:0, summa:0};
       aroqStats[k].blok += it.blok;
-      aroqStats[k].dona += (it.dona||it.blok);
-      aroqStats[k].summa += it.narx ? (it.tashqi ? it.blok*it.narx : it.dona*it.narx) : 0;
+      aroqStats[k].dona += itemDona(it);
+      aroqStats[k].summa += itemSum(it);
     });
   });
   const topAroqlar = Object.entries(aroqStats).sort((a,b)=>b[1].blok-a[1].blok).slice(0,10);
@@ -1240,19 +1358,43 @@ function renderUmumiyHisobot() {
   if(!topAroqlar.length) topTbody.innerHTML = '<tr><td colspan="5" class="empty">Hali sotuv yo\'q</td></tr>';
   else topTbody.innerHTML = topAroqlar.map(([nom,st],i)=>`<tr><td class="num-cell">${i+1}</td><td>${esc(nom)}</td><td><span class="qty-pill blok">${st.blok} blok</span></td><td><span class="qty-pill dona">${st.dona} dona</span></td><td>${st.summa?fmt(st.summa)+' so\'m':'—'}</td></tr>`).join('');
 
-  // TOP mijozlar
-  const mijozStats = {};
+  // TOP mijozlar — har biri ochiladigan, sotilgan/vitrina alohida, sana bo'yicha detallar bilan
+  const mijozMap = {};
   sotuvlar.forEach(s=>{
     const m = s.mijoz || 'Noma\'lum';
-    if(!mijozStats[m]) mijozStats[m] = {count:0, blok:0, summa:0};
-    mijozStats[m].count += 1;
-    mijozStats[m].blok += groupBlok(s);
-    mijozStats[m].summa += groupTotal(s);
+    if(!mijozMap[m]) mijozMap[m] = { sold:[], vit:[] };
+    if(s.tolov==='vitrina') mijozMap[m].vit.push(s); else mijozMap[m].sold.push(s);
   });
-  const topMijozlar = Object.entries(mijozStats).sort((a,b)=>b[1].summa-a[1].summa).slice(0,10);
-  const mijozTbody = document.getElementById('umumiy-mijoz-tbody');
-  if(!topMijozlar.length) mijozTbody.innerHTML = '<tr><td colspan="5" class="empty">Hali mijoz yo\'q</td></tr>';
-  else mijozTbody.innerHTML = topMijozlar.map(([nom,st],i)=>`<tr><td class="num-cell">${i+1}</td><td>${esc(nom)}</td><td>${st.count}</td><td><span class="qty-pill blok">${st.blok} blok</span></td><td>${st.summa?fmt(st.summa)+' so\'m':'—'}</td></tr>`).join('');
+  const mijozArr = Object.entries(mijozMap).map(([nom,o])=>{
+    const soldBlok = o.sold.reduce((t,s)=>t+groupBlok(s),0);
+    const vitBlok = o.vit.reduce((t,s)=>t+groupBlok(s),0);
+    const summa = [...o.sold, ...o.vit].reduce((t,s)=>t+groupTotal(s),0);
+    return { nom, sold:o.sold, vit:o.vit, soldBlok, vitBlok, jamiBlok:soldBlok+vitBlok, summa, count:o.sold.length+o.vit.length };
+  }).sort((a,b)=> b.summa - a.summa || b.jamiBlok - a.jamiBlok).slice(0,10);
+
+  const mijozWrap = document.getElementById('umumiy-mijoz-list');
+  if(!mijozArr.length) { mijozWrap.innerHTML = '<div class="empty">Hali mijoz yo\'q</div>'; return; }
+
+  function miniSalesHtml(arr){
+    if(!arr.length) return '<div class="empty" style="padding:0.8rem">Yo\'q</div>';
+    return [...arr].sort((a,b)=>(b.sana+(b.time||'')).localeCompare(a.sana+(a.time||''))).map(s=>{
+      const lines = (s.items||[]).map(it=>`<div class="mini-line"><span class="ml-name">${esc(it.nom)} ${it.litr}L</span><span class="gl-qty"><span class="qty-pill blok">${it.blok} blok</span><span class="qty-pill dona">${itemDona(it)} dona</span></span><span class="gl-sum">${it.narx?fmt(itemSum(it))+" so'm":'—'}</span></div>`).join('');
+      const st = groupTotal(s);
+      return `<div class="mini-sale"><div class="mini-sale-head"><span>${dateDisplay(s.sana)} ${s.time||''} ${tolovBadge(s.tolov, s.qarzTolandi)}</span><span>${st?fmt(st)+" so'm":'—'}</span></div>${lines}</div>`;
+    }).join('');
+  }
+
+  mijozWrap.innerHTML = mijozArr.map((c,i)=>{
+    const soldDrop = c.sold.length ? `<details class="subdrop"><summary><span><span class="drop-chevron">▶</span> 🛒 Sotilgan (naqd/qarz) — ${c.soldBlok} blok</span><span style="color:var(--text-secondary)">${c.sold.length} ta sotuv</span></summary><div class="subdrop-body">${miniSalesHtml(c.sold)}</div></details>` : '';
+    const vitDrop = c.vit.length ? `<details class="subdrop"><summary><span><span class="drop-chevron">▶</span> 🏪 Vitrina — ${c.vitBlok} blok</span><span style="color:var(--text-secondary)">${c.vit.length} ta</span></summary><div class="subdrop-body">${miniSalesHtml(c.vit)}</div></details>` : '';
+    return `<div class="cust-card"><details class="drop"><summary>
+      <span class="drop-title"><span class="cust-rank">${i+1}</span><span class="drop-chevron">▶</span> ${esc(c.nom)}</span>
+      <span class="drop-meta"><span>${c.count} sotuv</span><span class="qty-pill blok">${c.jamiBlok} blok</span><span class="sc-sum">${c.summa?fmt(c.summa)+" so'm":'—'}</span></span>
+    </summary><div class="drop-body">
+      ${soldDrop}${vitDrop}
+      <div class="cust-totals"><span class="tot-chip sold">Sotilgan: <b>${c.soldBlok}</b> blok</span><span class="tot-chip vit">Vitrina: <b>${c.vitBlok}</b> blok</span><span class="tot-chip all">Jami: <b>${c.jamiBlok}</b> blok</span></div>
+    </div></details></div>`;
+  }).join('');
 }
 
 (async function init() {
