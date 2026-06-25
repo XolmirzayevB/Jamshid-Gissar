@@ -181,6 +181,22 @@ h1.page-title { font-size: 20px; font-weight: 700; margin-bottom: 1rem; }
 .sc-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
 .chek-btn { background: var(--bg-info); color: var(--text-info); border: none; padding: 9px 18px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; font-weight: 700; }
 .chek-btn:hover { opacity: 0.85; }
+/* Tekis ustunli tovar qatorlari (jadval) */
+.line-table { width: 100%; border-collapse: collapse; }
+.line-table td { padding: 8px 0; border-top: 0.5px solid var(--border-tertiary); font-size: 13px; vertical-align: middle; }
+.line-table tr:first-child td { border-top: none; }
+.line-table .lt-name { color: var(--text-primary); padding-right: 10px; }
+.line-table .lt-qty { text-align: right; white-space: nowrap; width: 1%; padding-left: 6px; }
+.line-table .lt-sum { text-align: right; white-space: nowrap; width: 1%; padding-left: 14px; font-weight: 600; color: var(--text-primary); }
+.qarz-status { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.qs-chip { font-size: 12px; padding: 6px 12px; border-radius: var(--radius-md); background: var(--bg-secondary); color: var(--text-secondary); }
+.qs-chip.paid { background: #e7f6ee; color: #137333; }
+.qs-chip.rem { background: #fdecea; color: #c5221f; }
+.qs-chip.done { background: #e7f0fe; color: #1967d2; }
+html[data-theme="dark"] .qs-chip { background: #2a313c; }
+html[data-theme="dark"] .qs-chip.paid { background: #17321f; color: #5dd48a; }
+html[data-theme="dark"] .qs-chip.rem { background: #371a18; color: #ff7b73; }
+html[data-theme="dark"] .qs-chip.done { background: #16263f; color: #6ab0ff; }
 
 /* ===== Kirim sessiya kartalari va dropdown ===== */
 .kirim-card { background: var(--bg-primary); border: 0.5px solid var(--border-tertiary); border-left: 4px solid #12b5a5; border-radius: var(--radius-lg); margin-bottom: 10px; overflow: hidden; }
@@ -1230,6 +1246,13 @@ function groupTotal(s) {
 function groupBlok(s) { return (s.items||[]).reduce((t,it)=>t + it.blok, 0); }
 function groupDona(s) { return (s.items||[]).reduce((t,it)=>t + itemDona(it), 0); }
 
+// Qarz to'lovi: qancha to'langan va qancha qoldiq (qisman to'lovni qo'llab-quvvatlaydi)
+function paidAmount(s) {
+  if(typeof s.tolanganSumma === 'number') return Math.max(0, Math.min(s.tolanganSumma, groupTotal(s)));
+  return s.qarzTolandi ? groupTotal(s) : 0; // eski yozuvlar uchun
+}
+function remainingAmount(s) { return Math.max(0, groupTotal(s) - paidAmount(s)); }
+
 // Bir xil aroqning o'z + tashqi qismlarini bitta qatorga birlashtiradi (ko'rsatish uchun)
 function mergeItems(items) {
   const map = {}; const order = [];
@@ -1296,15 +1319,21 @@ function renderGroupedSale(s, opts) {
   const dona = groupDona(s);
   const merged = mergeItems(s.items);
   const itemCount = merged.length;
-  const linesHtml = merged.map(m=>{
-    return `<div class="gs-line">
-      <span class="gl-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</span>
-      <span class="gl-qty"><span class="qty-pill blok">${m.blok} blok</span><span class="qty-pill dona">${m.dona} dona</span></span>
-      <span class="gl-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</span>
-    </div>`;
-  }).join('');
+  const linesHtml = `<table class="line-table"><tbody>` + merged.map(m=>{
+    return `<tr>
+      <td class="lt-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</td>
+      <td class="lt-qty"><span class="qty-pill blok">${m.blok} blok</span></td>
+      <td class="lt-qty"><span class="qty-pill dona">${m.dona} dona</span></td>
+      <td class="lt-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</td>
+    </tr>`;
+  }).join('') + `</tbody></table>`;
   const izohHtml = s.izoh ? `<div class="grouped-izoh">📝 ${esc(s.izoh)}</div>` : '';
-  const payBtnHtml = (s.tolov==='qarz' && !s.qarzTolandi && opts.showPayBtn) ? `<button class="pay-btn" data-pay-group="${esc(s.groupId)}">✅ To'landi</button>` : '';
+  let qarzInfoHtml = '';
+  if(s.tolov==='qarz') {
+    const paid = paidAmount(s), rem = remainingAmount(s);
+    qarzInfoHtml = `<div class="qarz-status"><span class="qs-chip paid">To'langan: <b>${fmt(paid)} so'm</b></span><span class="qs-chip ${rem>0?'rem':'done'}">Qoldiq: <b>${fmt(rem)} so'm</b></span></div>`;
+  }
+  const payBtnHtml = (s.tolov==='qarz' && !s.qarzTolandi && opts.showPayBtn) ? `<button class="pay-btn" data-pay-group="${esc(s.groupId)}">💵 To'lov qabul qilish</button>` : '';
   return `<div class="sale-card ${saleCardClass(s)}"><details class="drop">
     <summary>
       <span class="sc-left"><span class="drop-chevron">▶</span><span class="sc-namewrap"><span class="sc-name">${esc(s.mijoz)}</span><span class="sc-meta">${dateDisplay(s.sana)} ${s.time||''} · ${itemCount} xil ${tolovBadge(s.tolov, s.qarzTolandi)}</span></span></span>
@@ -1313,6 +1342,7 @@ function renderGroupedSale(s, opts) {
     <div class="sc-body">
       ${linesHtml}
       ${izohHtml}
+      ${qarzInfoHtml}
       <div class="sc-actions">
         ${payBtnHtml}
         <button class="chek-btn" data-chek-group="${esc(s.groupId)}">📄 Chek ko'rish</button>
@@ -1331,7 +1361,7 @@ function attachSaleCardHandlers(container) {
     });
   });
   container.querySelectorAll('[data-pay-group]').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); qarzTola(btn.dataset.payGroup); });
+    btn.addEventListener('click', (e)=>{ e.preventDefault(); e.stopPropagation(); showQarzPaymentModal(btn.dataset.payGroup); });
   });
 }
 
@@ -1359,21 +1389,72 @@ function renderQarzlar() {
   if(fm) qarzlar = qarzlar.filter(s=>(s.mijoz||'').toLowerCase().includes(fm));
   const wrap=document.getElementById('qarz-list');
   const metrics=document.getElementById('qarz-metrics');
-  const ochiq=qarzlar.filter(s=>!s.qarzTolandi);
-  const ochiqSum=ochiq.reduce((t,s)=>t+groupTotal(s),0);
-  const yopiq=qarzlar.filter(s=>s.qarzTolandi);
-  metrics.innerHTML=`<div class="metric m-amber"><div class="metric-label">Ochiq qarzlar</div><div class="metric-val">${ochiq.length}</div></div><div class="metric m-red"><div class="metric-label">Ochiq summa</div><div class="metric-val">${fmt(ochiqSum)} so'm</div></div><div class="metric m-green"><div class="metric-label">To'langan</div><div class="metric-val">${yopiq.length}</div></div>`;
+  const ochiq=qarzlar.filter(s=>remainingAmount(s)>0);
+  const ochiqSum=qarzlar.reduce((t,s)=>t+remainingAmount(s),0);
+  const collectedSum=qarzlar.reduce((t,s)=>t+paidAmount(s),0);
+  metrics.innerHTML=`<div class="metric m-amber"><div class="metric-label">Ochiq qarzlar</div><div class="metric-val">${ochiq.length}</div></div><div class="metric m-red"><div class="metric-label">Qoldiq summa (to'lanmagan)</div><div class="metric-val">${fmt(ochiqSum)} so'm</div></div><div class="metric m-green"><div class="metric-label">To'langan summa</div><div class="metric-val">${fmt(collectedSum)} so'm</div></div>`;
   if(!qarzlar.length){wrap.innerHTML='<div class="empty">Qarz yo\'q</div>';return;}
   wrap.innerHTML=[...qarzlar].reverse().map(s=>renderGroupedSale(s,{showPayBtn:true})).join('');
   attachSaleCardHandlers(wrap);
 }
 
-function qarzTola(groupId) {
-  const sotuvlar=load('sotuv');
+function showQarzPaymentModal(groupId) {
+  const sotuvlar = load('sotuv');
+  const s = sotuvlar.find(x=>x.groupId===groupId);
+  if(!s) return;
+  const total = groupTotal(s);
+  const paid = paidAmount(s);
+  const rem = remainingAmount(s);
+  const html = `<div class="receipt-overlay" id="confirm-overlay-bg"><div class="confirm-box">
+    <div class="confirm-title">💵 Qarz to'lovi — ${esc(s.mijoz)}</div>
+    <div class="confirm-msg">
+      Umumiy qarz: <b>${fmt(total)} so'm</b><br>
+      Avval to'langan: <b>${fmt(paid)} so'm</b><br>
+      Qoldiq: <b>${fmt(rem)} so'm</b>
+    </div>
+    <label style="font-size:13px; color:var(--text-secondary); font-weight:500">Hozir qancha to'ladi? (so'm)</label>
+    <input type="number" id="qarz-pay-input" min="0" max="${rem}" value="${rem}" style="margin:6px 0 14px">
+    <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap">
+      <button class="chek-btn" id="qarz-pay-half" style="flex:1">Yarmi (${fmt(Math.round(rem/2))})</button>
+      <button class="chek-btn" id="qarz-pay-full" style="flex:1">To'liq (${fmt(rem)})</button>
+    </div>
+    <div class="confirm-actions">
+      <button class="cancel-confirm" id="confirm-no">Bekor</button>
+      <button class="danger-confirm" id="qarz-pay-yes" style="background:var(--bg-success); color:var(--text-success)">✅ Saqlash</button>
+    </div>
+  </div></div>`;
+  document.getElementById('receipt-modal').innerHTML = html;
+  const inp = document.getElementById('qarz-pay-input');
+  document.getElementById('confirm-overlay-bg').addEventListener('click', e=>{ if(e.target.id==='confirm-overlay-bg') closeReceipt(); });
+  document.getElementById('confirm-no').addEventListener('click', closeReceipt);
+  document.getElementById('qarz-pay-half').addEventListener('click', ()=>{ inp.value = Math.round(rem/2); });
+  document.getElementById('qarz-pay-full').addEventListener('click', ()=>{ inp.value = rem; });
+  document.getElementById('qarz-pay-yes').addEventListener('click', ()=>{
+    const amt = Math.max(0, parseInt(inp.value)||0);
+    if(amt<=0){ showToast("Summa kiriting"); return; }
+    closeReceipt();
+    applyQarzPayment(groupId, amt);
+  });
+}
+
+function applyQarzPayment(groupId, amount) {
+  const sotuvlar = load('sotuv');
   const idx = sotuvlar.findIndex(s=>s.groupId===groupId);
-  if(idx>=0) { sotuvlar[idx].qarzTolandi=true; sotuvlar[idx].tolanganSana = today(); }
-  save('sotuv',sotuvlar);
-  showToast("✅ Qarz to'landi deb belgilandi — naqd tushumga qo'shildi");
+  if(idx<0) return;
+  const s = sotuvlar[idx];
+  const total = groupTotal(s);
+  let paid = paidAmount(s) + amount;
+  if(paid >= total) {
+    paid = total;
+    s.qarzTolandi = true;
+    s.tolanganSana = today();
+  } else {
+    s.qarzTolandi = false;
+  }
+  s.tolanganSumma = paid;
+  save('sotuv', sotuvlar);
+  const rem = Math.max(0, total - paid);
+  showToast(rem>0 ? `💵 ${fmt(amount)} so'm qabul qilindi — qoldiq: ${fmt(rem)} so'm` : "✅ Qarz to'liq to'landi");
   renderQarzlar();
 }
 
@@ -1523,13 +1604,12 @@ function renderHisobot() {
   if(fm) list=list.filter(s=>(s.mijoz||'').toLowerCase().includes(fm));
   list=list.reverse();
   const naqdDirect = list.filter(s=>s.tolov==='naqd');
-  const qarzPaid = list.filter(s=>s.tolov==='qarz'&&s.qarzTolandi);
-  const qarzOpen = list.filter(s=>s.tolov==='qarz'&&!s.qarzTolandi);
+  const qarzSales = list.filter(s=>s.tolov==='qarz');
   const vitrina=list.filter(s=>s.tolov==='vitrina');
   const naqdDirectSum = naqdDirect.reduce((t,s)=>t+groupTotal(s),0);
-  const qarzPaidSum = qarzPaid.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzPaidSum = qarzSales.reduce((t,s)=>t+paidAmount(s),0);
   const totalRealizedIncome = naqdDirectSum + qarzPaidSum;
-  const qarzOpenSum = qarzOpen.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzOpenSum = qarzSales.reduce((t,s)=>t+remainingAmount(s),0);
   const vitrinaBlok=vitrina.reduce((t,s)=>t+groupBlok(s),0);
   const totalBlok=list.reduce((t,s)=>t+groupBlok(s),0);
   document.getElementById('hisob-metrics').innerHTML=`
@@ -1577,13 +1657,12 @@ function renderUmumiyHisobot() {
   const boshlanganSana = allDates.length ? allDates[0] : today();
 
   const naqdDirect = sotuvlar.filter(s=>s.tolov==='naqd');
-  const qarzPaid = sotuvlar.filter(s=>s.tolov==='qarz'&&s.qarzTolandi);
-  const qarzOpen = sotuvlar.filter(s=>s.tolov==='qarz'&&!s.qarzTolandi);
+  const qarzSales = sotuvlar.filter(s=>s.tolov==='qarz');
   const vitrina = sotuvlar.filter(s=>s.tolov==='vitrina');
 
   const naqdSum = naqdDirect.reduce((t,s)=>t+groupTotal(s),0);
-  const qarzPaidSum = qarzPaid.reduce((t,s)=>t+groupTotal(s),0);
-  const qarzOpenSum = qarzOpen.reduce((t,s)=>t+groupTotal(s),0);
+  const qarzPaidSum = qarzSales.reduce((t,s)=>t+paidAmount(s),0);
+  const qarzOpenSum = qarzSales.reduce((t,s)=>t+remainingAmount(s),0);
   const totalIncome = naqdSum + qarzPaidSum;
   const totalKirimBlok = kirimlar.reduce((t,k)=>t+(k.blok||0),0);
   const uniqueMijozlar = new Set(sotuvlar.map(s=>s.mijoz)).size;
@@ -1673,7 +1752,7 @@ function renderUmumiyHisobot() {
   function miniSalesHtml(arr){
     if(!arr.length) return '<div class="empty" style="padding:0.8rem">Yo\'q</div>';
     return [...arr].sort((a,b)=>(b.sana+(b.time||'')).localeCompare(a.sana+(a.time||''))).map(s=>{
-      const lines = mergeItems(s.items).map(m=>`<div class="mini-line"><span class="ml-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</span><span class="gl-qty"><span class="qty-pill blok">${m.blok} blok</span><span class="qty-pill dona">${m.dona} dona</span></span><span class="gl-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</span></div>`).join('');
+      const lines = `<table class="line-table"><tbody>` + mergeItems(s.items).map(m=>`<tr><td class="lt-name">${esc(m.nom)} ${m.litr}L${tashqiNote(m)}</td><td class="lt-qty"><span class="qty-pill blok">${m.blok} blok</span></td><td class="lt-qty"><span class="qty-pill dona">${m.dona} dona</span></td><td class="lt-sum">${m.narx?fmt(m.sum)+" so'm":'—'}</td></tr>`).join('') + `</tbody></table>`;
       const st = groupTotal(s);
       return `<div class="mini-sale"><div class="mini-sale-head"><span>${dateDisplay(s.sana)} ${s.time||''} ${tolovBadge(s.tolov, s.qarzTolandi)}</span><span>${st?fmt(st)+" so'm":'—'}</span></div>${lines}</div>`;
     }).join('');
